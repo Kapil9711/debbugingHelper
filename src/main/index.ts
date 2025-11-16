@@ -4,7 +4,48 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { startDebugServer } from './server'
 
-let debugData: any[] = []
+let debugData: any[] = [
+  {
+    type: 'company',
+    data: {
+      name: 'TechCorp',
+      departments: {
+        engineering: {
+          frontend: {
+            teamLead: 'Alice',
+            developers: [
+              { name: 'John', level: 'mid' },
+              { name: 'Emma', level: 'junior' }
+            ]
+          },
+          backend: {
+            teamLead: 'Tom',
+            developers: [
+              { name: 'Mike', level: 'senior' },
+              { name: 'Lisa', level: 'mid' }
+            ]
+          }
+        },
+        hr: {
+          manager: 'Sophia',
+          employees: 5
+        }
+      }
+    }
+  },
+  {
+    type: 'order',
+    data: {
+      orderId: 501,
+      customer: 'Michael',
+      items: [
+        { name: 'Keyboard', price: 30 },
+        { name: 'Mouse', price: 15 },
+        { name: 'Monitor', price: 150 }
+      ]
+    }
+  }
+]
 let allLogsMode = false
 let autoClearLength = 301
 

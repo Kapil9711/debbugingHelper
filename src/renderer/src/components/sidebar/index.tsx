@@ -6,6 +6,7 @@ import { TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
 import { useState } from 'react'
 import { IoIosSettings } from 'react-icons/io'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const SideBar = () => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
@@ -56,45 +57,33 @@ const SideBar = () => {
           </div>
         </div>
       </Header>
-      <SidebarContent active={active} setActive={setActive} />
-      <BottomContent active={active} setActive={setActive} />
+      <SidebarContent />
+      <BottomContent />
     </div>
   )
 }
 
 const sidebarData = [
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  { title: 'Console', icon: <VscDebugConsole /> },
-  ,
+  { title: 'Console', icon: <VscDebugConsole />, url: '/' },
+  { title: 'Console', icon: <VscDebugConsole />, url: '/about' }
 ]
 
-const SidebarContent = ({ active, setActive }: any) => {
+const SidebarContent = () => {
   const { isSidebarExpanded } = useThemeContext()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const path = location.pathname
 
   return (
     <div className="flex flex-col px-5! py-8! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
       {sidebarData?.map((item: any, index: any) => {
         return (
           <p
-            onClick={() => setActive(index)}
+            onClick={() => {
+              navigate(item?.url)
+            }}
             key={index}
-            className={` shrink-0 h-9!  ${active == index ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+            className={` hover:scale-[1.02] shrink-0 h-9!  ${path == item?.url ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
           >
             <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
               {item?.icon}
@@ -111,17 +100,22 @@ const SidebarContent = ({ active, setActive }: any) => {
   )
 }
 
-const BottomContent = ({ active, setActive }: any) => {
-  const { theme, isSidebarExpanded } = useThemeContext()
+const BottomContent = () => {
+  const { isSidebarExpanded } = useThemeContext()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const path = location.pathname
 
   return (
     <div
       className={`h-20 px-5!  w-full flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'}  items-center`}
     >
       <p
-        onClick={() => setActive('setting')}
+        onClick={() => {
+          navigate('/settings')
+        }}
         // key={index}
-        className={` shrink-0 h-9!  ${active == 'setting' ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+        className={` shrink-0 h-9!  ${path == '/settings' ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
       >
         <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
           <IoIosSettings />

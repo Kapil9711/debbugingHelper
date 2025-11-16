@@ -1,5 +1,6 @@
 import SideBar from '@renderer/components/sidebar'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { Outlet } from 'react-router-dom'
 
 const ThemeContext = createContext(null as any)
 export const useThemeContext = () => useContext(ThemeContext)
@@ -27,7 +28,7 @@ const MainLayout = ({ children }: any) => {
 
         {/* //right page Content */}
         <div className="h-full transition-all duration-100 ease-in  flex-1   overflow-hidden bg-[var(--bg-content)]">
-          {children}
+          <Outlet />
         </div>
       </div>
     </ThemeContext.Provider>
