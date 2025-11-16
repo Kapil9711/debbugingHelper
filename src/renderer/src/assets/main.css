@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@import './base.css';
+@custom-variant mobile {
+  @media (max-width: 775px) {
+    @slot;
+  }
+}
+@custom-variant tabletS {
+  @media (min-width: 776px) and (max-width: 1023px) {
+    @slot;
+  }
+}
+@custom-variant tabletL {
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    @slot;
+  }
+}
+@custom-variant desktopS {
+  @media (min-width: 1280px) and (max-width: 1599px) {
+    @slot;
+  }
+}
+@custom-variant desktopL {
+  @media (min-width: 1600px) {
+    @slot;
+  }
+}
