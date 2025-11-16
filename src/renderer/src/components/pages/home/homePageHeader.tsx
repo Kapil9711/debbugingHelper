@@ -4,7 +4,7 @@ import Header from '../../header'
 const HomePageHeader = () => {
   const { allLogsMode, setAllLogsMode, logs, autoClearLength, setAutoClearLength, setLogs } =
     useHomePageContext()
-  const { theme } = useHomePageContext()
+  const { theme, isSidebarExpanded } = useHomePageContext()
 
   return (
     <Header>
@@ -21,7 +21,7 @@ const HomePageHeader = () => {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 mobile:hidden tabletS:hidden ">
           <p className="uppercase text-[13px] flex items-center gap-1">
             <span>Auto clear length - </span>
             <span className="text-[16px]">{autoClearLength}</span>
@@ -44,7 +44,7 @@ const HomePageHeader = () => {
           />
         </div>
 
-        <div className=" flex flex-col items-center gap-1">
+        <div className="mobile:hidden tabletS:hidden flex flex-col items-center gap-1">
           <div className="flex gap-2 items-center">
             <p className="text-[13px] tracking-[.8px] font-medium uppercase">Total Logs - </p>
             <p className="text-[18px] tracking-[.8px] font-medium uppercase">{logs?.length}</p>
@@ -54,7 +54,7 @@ const HomePageHeader = () => {
               await window.debugApi.clearLogs()
               setLogs([]) // Clear UI immediately
             }}
-            className="bg-red-600 w-28 p-1.5! rounded-md leading-[1] py-2! uppercase text-xs cursor-pointer"
+            className="bg-red-600 w-28 p-1.5! rounded-md leading-[1] py-2! uppercase text-xs cursor-pointer text-white"
           >
             Clear Now
           </button>

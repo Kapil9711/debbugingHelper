@@ -1,7 +1,9 @@
+import SettingsHeader from '@renderer/components/pages/settings/settingsHeader'
+
 const Settings = () => {
   return (
     <div>
-      <p>Settings page</p>
+      <SettingsHeader />
     </div>
   )
 }

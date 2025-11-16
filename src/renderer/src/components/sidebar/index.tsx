@@ -14,7 +14,7 @@ const SideBar = () => {
 
   return (
     <div
-      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)] border-r-[.5px] border-gray-400`}
+      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full mobile:max-w-[250px] tabletS:max-w-[280px] tabletL:max-w-[300px]  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)] border-r-[.5px] border-gray-400`}
     >
       <Header>
         <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center   px-4! ">
@@ -63,10 +63,7 @@ const SideBar = () => {
   )
 }
 
-const sidebarData = [
-  { title: 'Console', icon: <VscDebugConsole />, url: '/' },
-  { title: 'Console', icon: <VscDebugConsole />, url: '/about' }
-]
+const sidebarData = [{ title: 'Console', icon: <VscDebugConsole />, url: '/' }]
 
 const SidebarContent = () => {
   const { isSidebarExpanded } = useThemeContext()

@@ -20,6 +20,12 @@ export function startDebugServer(debugData: any, allLogsMode: any, autoClearLeng
     return res.status(200).json({ isSuccess: true })
   })
 
+  app.post('/network', (req: any, res: any) => {
+    console.log(req.body, 'newtworkRequest')
+    const payload = { data: req.body, type: 'newtworkRequest' }
+    debugData.push(payload)
+  })
+
   // Run server
   const PORT = 5600
   app.listen(PORT, () => {
