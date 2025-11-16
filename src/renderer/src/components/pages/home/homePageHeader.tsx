@@ -27,13 +27,14 @@ const HomePageHeader = () => {
             <span className="text-[16px]">{autoClearLength}</span>
           </p>
           <input
-            className={`h-[30px] border-none !px-2.5 rounded-lg w-40 bg-[var(--rev-bg-header)] ${theme == 'light' ? 'text-black!' : 'text-white!'}   text-sm`}
+            key={theme}
+            className={`h-[30px] border-none px-2.5! rounded-lg w-40 bg-gray-200 text-black text-sm`}
             type="number"
             placeholder="Auto Clear Length"
             value={autoClearLength || ''}
             onChange={(e) => {
               if (Number(e.target.value)) {
-                if (Number(e.target.value) >= 1) {
+                if (Number(e.target.value) >= 1 && e.target.value?.length < 4) {
                   setAutoClearLength(Number(e.target.value))
                 }
               } else {
