@@ -3,17 +3,20 @@ import Header from '../header'
 import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
 import { TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
+import { VscDebugConsole } from 'react-icons/vsc'
 import { useState } from 'react'
+import { IoIosSettings } from 'react-icons/io'
 
 const SideBar = () => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
+  let [active, setActive] = useState(0)
 
   return (
     <div
-      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'}   h-full  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)]`}
+      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)] border-r-[.5px] border-gray-400`}
     >
       <Header>
-        <div className="w-full h-full  flex justify-between items-center   px-4! ">
+        <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center   px-4! ">
           {isSidebarExpanded && (
             <div className="flex items-center gap-3">
               <img
@@ -53,6 +56,86 @@ const SideBar = () => {
           </div>
         </div>
       </Header>
+      <SidebarContent active={active} setActive={setActive} />
+      <BottomContent active={active} setActive={setActive} />
+    </div>
+  )
+}
+
+const sidebarData = [
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  { title: 'Console', icon: <VscDebugConsole /> },
+  ,
+]
+
+const SidebarContent = ({ active, setActive }: any) => {
+  const { isSidebarExpanded } = useThemeContext()
+
+  return (
+    <div className="flex flex-col px-5! py-8! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
+      {sidebarData?.map((item: any, index: any) => {
+        return (
+          <p
+            onClick={() => setActive(index)}
+            key={index}
+            className={` shrink-0 h-9!  ${active == index ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+          >
+            <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
+              {item?.icon}
+            </span>
+            {isSidebarExpanded && (
+              <span className="uppercase font-[450] text-[15px] tracking-[.8px]">
+                {item?.title}
+              </span>
+            )}
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
+const BottomContent = ({ active, setActive }: any) => {
+  const { theme, isSidebarExpanded } = useThemeContext()
+
+  return (
+    <div
+      className={`h-20 px-5!  w-full flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'}  items-center`}
+    >
+      <p
+        onClick={() => setActive('setting')}
+        // key={index}
+        className={` shrink-0 h-9!  ${active == 'setting' ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+      >
+        <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
+          <IoIosSettings />
+        </span>
+        {isSidebarExpanded && (
+          <span className="uppercase font-[450] text-[15px] tracking-[.8px]">Settings</span>
+        )}
+      </p>
+      {/* <p className="flex items-center gap-4 ">
+        <span>
+          <IoIosSettings size={20} color={theme == 'light' ? 'black' : 'white'} />
+        </span>
+        {isSidebarExpanded && <span>Settings</span>}
+      </p> */}
     </div>
   )
 }
