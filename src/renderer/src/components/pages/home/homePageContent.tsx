@@ -1,18 +1,113 @@
 import { useHomePageContext } from '@renderer/screen/homePage'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 
 const HomePageContent = () => {
   const { logs } = useHomePageContext()
+  const [filterLogs, setFilterLogs] = useState(logs)
   const handleCopy = async (textToCopy) => {
     await navigator.clipboard.writeText(textToCopy)
     toast.success('Copied To Clipboard')
   }
 
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  const filterRef = useRef('' as any)
+
+  const handleFilter = (filter: string) => {
+    const userInput = filter
+    const pattern = new RegExp(escapeRegex(userInput), 'i')
+    const obj = logs?.filter((item: any) => {
+      const obj = JSON.stringify(item, null, 2)
+      return pattern.test(obj)
+    })
+    setFilterLogs(obj)
+  }
+
+  const handleRemoveDuplicate = (flag) => {
+    if (flag) {
+      const arr: any = []
+      const actualArr: any = []
+      filterLogs.forEach((item: any) => {
+        const obj = JSON.stringify(item.data, null, 2)
+        if (!arr.includes(obj)) {
+          arr.push(obj)
+          actualArr.push(item)
+        }
+      })
+      setFilterLogs(actualArr)
+    }
+    if (!flag) {
+      handleFilter(filterRef?.current)
+    }
+  }
+
   const [isHovered, setIsHovered] = useState(0)
   return (
-    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] ">
+    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative">
+      <HomePageFilters
+        count={filterLogs?.length}
+        handleFilter={handleFilter}
+        handleRemoveDuplicate={handleRemoveDuplicate}
+        filterRef={filterRef}
+      />
+      <DataList
+        logs={filterLogs}
+        setIsHovered={setIsHovered}
+        isHovered={isHovered}
+        handleCopy={handleCopy}
+      />
+    </div>
+  )
+}
+
+const HomePageFilters = ({ handleFilter, count, handleRemoveDuplicate, filterRef }: any) => {
+  const [filter, setFilter] = useState('')
+  const [removeDuplicate, setRemoveDubplicate] = useState(false)
+  useEffect(() => {
+    handleFilter(filter)
+    filterRef.current = filter
+  }, [filter])
+  return (
+    <div className="fixed! top-[100px]! right-5!  w-[15%] ">
+      <p className="text-sm mb-1!">Found ({count})</p>
+      <input
+        onBlur={() => {
+          handleFilter(filter)
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleFilter(filter)
+          }
+        }}
+        placeholder="Search"
+        className="px-3! bg-gray-300 text-gray-900 text-sm font-bold h-8 w-full rounded-md"
+        type="text"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+      <div className="flex items-center gap-2 mt-2!">
+        <p className="text-sm">Remove Duplicate</p>
+        <input
+          className="h-4 w-4"
+          type="checkbox"
+          checked={removeDuplicate}
+          onChange={() => {
+            setRemoveDubplicate(!removeDuplicate)
+            handleRemoveDuplicate(!removeDuplicate)
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
+  return (
+    <>
       {logs.map((item: any, index: any) => {
         return (
           <div
@@ -52,7 +147,7 @@ const HomePageContent = () => {
           </div>
         )
       })}
-    </div>
+    </>
   )
 }
 
