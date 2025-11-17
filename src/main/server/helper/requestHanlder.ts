@@ -1,42 +1,6 @@
-import express from 'express'
-import cors from 'cors'
-import bodyParser from 'body-parser'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-
-export function startDebugServer(
-  debugData: any,
-  allLogsMode: any,
-  autoClearLength: any,
-  stopConsole: any
-) {
-  const app = express()
-  app.use(cors())
-  app.use(bodyParser.json({ limit: '10mb' }))
-
-  // POST /debugging
-  app.post('/debugging', (req: any, res: any) => {
-    const { type, payload } = req.body
-    if (!payload) {
-      return res.status(400).json({ error: 'Missing payload' })
-    }
-    debugCopy(stopConsole, autoClearLength, debugData, allLogsMode, payload, type)
-    return res.status(200).json({ isSuccess: true })
-  })
-
-  app.post('/network', (req: any, res: any) => {
-    console.log(req.body, 'newtworkRequest')
-    const payload = { data: req.body, type: 'newtworkRequest' }
-    debugData.push(payload)
-  })
-
-  // Run server
-  const PORT = 5600
-  app.listen(PORT, () => {
-    console.log(`⚡ Debug server running: http://localhost:${PORT}/debugging`)
-  })
-}
 
 function debugCopy(
   stopConsole: any,
@@ -104,3 +68,5 @@ ${dataString}
 
   return true
 }
+
+export { debugCopy }

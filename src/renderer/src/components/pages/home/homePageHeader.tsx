@@ -37,9 +37,9 @@ const HomePageHeader = () => {
               className=" h-[30px] w-[50px] bg-green-400 rounded-md uppercase text-xs cursor-pointer flex justify-center items-center"
             >
               {stopConsole ? (
-                <FaPlay color="black" size={18} />
+                <FaPlay className="text-gray-900" size={18} />
               ) : (
-                <FaPauseCircle color="black" size={22} />
+                <FaPauseCircle className="text-gray-900" size={22} />
               )}
             </button>
           </div>

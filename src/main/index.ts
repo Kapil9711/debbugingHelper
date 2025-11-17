@@ -1,13 +1,9 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { startDebugServer } from './server'
-
-let debugData: any[] = []
-let allLogsMode = false
-let autoClearLength = 301
-let stopConsole = false
+import { startDebugServer } from './server/server'
+import { state, registerIPCHandlers } from './ipcHandler'
 
 function createWindow(): void {
   // Create the browser window.
@@ -55,14 +51,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-  startDebugServer(
-    debugData,
-    () => allLogsMode,
-    () => autoClearLength,
-    () => stopConsole
-  )
+  startDebugServer()
+  registerIPCHandlers()
   createWindow()
 
   app.on('activate', function () {
@@ -81,23 +71,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
-})
-
-ipcMain.handle('get-debug-data', () => debugData)
-ipcMain.handle('set-all-logs-mode', (_: any, value: boolean) => {
-  allLogsMode = value
-})
-
-ipcMain.handle('set-stop-console', (_: any, value: boolean) => {
-  stopConsole = value
-})
-ipcMain.handle('set-auto-clear-length', (_: any, value: number) => {
-  autoClearLength = value
-})
-
-ipcMain.handle('clear-debug-data', () => {
-  debugData.length = 0 // Clear array
-  return true
 })
 
 // In this file you can include the rest of your app's specific main process
