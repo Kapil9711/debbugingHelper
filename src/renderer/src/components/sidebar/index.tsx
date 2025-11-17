@@ -4,13 +4,14 @@ import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
 import { TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
-import { useState } from 'react'
+
 import { IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 const SideBar = () => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
-  let [active, setActive] = useState(0)
 
   return (
     <div
@@ -70,21 +71,30 @@ const SidebarContent = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const path = location.pathname
+  // const [isHovered, setIsHovered] = useState('')
 
   return (
     <div className="flex flex-col px-5! py-8! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
       {sidebarData?.map((item: any, index: any) => {
         return (
           <p
+            // onMouseEnter={() => setIsHovered(index)}
+            // onMouseLeave={() => setIsHovered('')}
             onClick={() => {
               navigate(item?.url)
             }}
             key={index}
-            className={` hover:scale-[1.02] shrink-0 h-9!  ${path == item?.url ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+            className={`relative hover:scale-[1.02] shrink-0 h-9!  ${path == item?.url ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
           >
             <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
               {item?.icon}
             </span>
+
+            {/* {!isSidebarExpanded && isHovered === index && (
+              <span className="absolute text-white left-[110%] top-[-50%] z-[99]">
+                {item?.title}
+              </span>
+            )} */}
             {isSidebarExpanded && (
               <span className="uppercase font-[450] text-[15px] tracking-[.8px]">
                 {item?.title}
