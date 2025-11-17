@@ -1,14 +1,14 @@
 // import Versions from './components/Versions'
 // import electronLogo from './assets/electron.svg'
 import MainLayout from './layout/mainLayout'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './screen/homePage'
 import Settings from './screen/settings'
 import { Toaster } from 'react-hot-toast'
 
 function App(): React.JSX.Element {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Toaster
         position="bottom-right"
         reverseOrder={false}
@@ -47,7 +47,7 @@ function App(): React.JSX.Element {
           <Route path="*" element={<div>Not Found</div>} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

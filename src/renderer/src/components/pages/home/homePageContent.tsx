@@ -50,7 +50,7 @@ const HomePageContent = () => {
     }
   }
 
-  const [isHovered, setIsHovered] = useState(0)
+  const [isHovered, setIsHovered] = useState('')
 
   useEffect(() => {
     handleFilter(filterRef?.current)
@@ -129,24 +129,26 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
         return (
           <div
             onMouseEnter={() => setIsHovered(index)}
-            onMouseLeave={() => setIsHovered(0)}
+            onMouseLeave={() => setIsHovered('')}
             key={index}
-            className="hover:border border-gray-300  hover:rounded-md flex flex-col justify-center w-fit p-2!  gap-1.5 cursor-pointer hover:shadow-md relative"
+            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative`}
           >
-            <button
-              style={{ display: isHovered == index ? 'block' : 'none' }}
-              onClick={() => {
-                const obj = JSON.stringify(item?.data, null, 2)
-                handleCopy(obj)
-              }}
-              className="absolute right-3 top-3 border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
-            >
-              Copy
-            </button>
+            <div className="flex items-center gap-5">
+              <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
+                {item?.time}
+              </p>
+              <button
+                style={{ display: isHovered == index ? 'block' : 'none' }}
+                onClick={() => {
+                  const obj = JSON.stringify(item?.data, null, 2)
+                  handleCopy(obj)
+                }}
+                className="border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
+              >
+                Copy
+              </button>
+            </div>
 
-            <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
-              {item?.time}
-            </p>
             <ReactJson
               style={{
                 width: 'fit-content',
