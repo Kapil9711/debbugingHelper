@@ -1,24 +1,47 @@
 import { useHomePageContext } from '@renderer/screen/homePage'
 import Header from '../../header'
+import { FaPauseCircle, FaPlay } from 'react-icons/fa'
 
 const HomePageHeader = () => {
-  const { allLogsMode, setAllLogsMode, logs, autoClearLength, setAutoClearLength, setLogs } =
-    useHomePageContext()
-  const { theme, isSidebarExpanded } = useHomePageContext()
+  const {
+    allLogsMode,
+    setAllLogsMode,
+    logs,
+    autoClearLength,
+    setAutoClearLength,
+    setLogs,
+    stopConsole,
+    setStopConsole
+  } = useHomePageContext()
+  const { theme } = useHomePageContext()
 
   return (
     <Header>
       <div className="text-center font-bold py-2.5   flex items-center justify-between gap-2.5 px-[30px]! border-b border-gray-400  h-full">
         <div className=" flex flex-col justify-center gap-2">
           <p className=" capitalize text-[13px] tracking-[.5px]">http://localhost:5600/debugging</p>
-          <div className="flex items-center gap-2.5">
-            <p className="text-[13px] tracking-[.8px] font-medium uppercase">as console</p>
-            <input
-              className="h-4 w-4 "
-              type="checkbox"
-              checked={allLogsMode}
-              onChange={() => setAllLogsMode((prev) => !prev)}
-            />
+          <div className="flex item-center gap-5 ">
+            <div className="flex items-center gap-2.5">
+              <p className="text-[13px] tracking-[.8px] font-medium uppercase">as console</p>
+              <input
+                className="h-4 w-4 bg-green-500"
+                type="checkbox"
+                checked={allLogsMode}
+                onChange={() => setAllLogsMode((prev) => !prev)}
+              />
+            </div>
+            <button
+              onClick={() => {
+                setStopConsole((prev) => !prev)
+              }}
+              className=" h-[30px] w-[50px] bg-green-400 rounded-md uppercase text-xs cursor-pointer flex justify-center items-center"
+            >
+              {stopConsole ? (
+                <FaPlay color="black" size={18} />
+              ) : (
+                <FaPauseCircle color="black" size={22} />
+              )}
+            </button>
           </div>
         </div>
         <div className="flex flex-col gap-1 mobile:hidden tabletS:hidden ">

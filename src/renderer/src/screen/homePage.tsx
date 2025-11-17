@@ -9,6 +9,7 @@ const HomePage = () => {
   const [logs, setLogs] = useState([] as any)
   const [allLogsMode, setAllLogsMode] = useState(false)
   const [autoClearLength, setAutoClearLength] = useState(301)
+  const [stopConsole, setStopConsole] = useState(false)
   const loadData = async () => {
     const data = await window.debugApi.getDebugData()
     setLogs([...data].reverse())
@@ -28,9 +29,22 @@ const HomePage = () => {
     window.debugApi.setAutoClearLength(Number(autoClearLength) || 1)
   }, [autoClearLength])
 
+  useEffect(() => {
+    window.debugApi.setStopConsole(stopConsole)
+  }, [stopConsole])
+
   const value = useMemo(() => {
-    return { allLogsMode, autoClearLength, logs, setAllLogsMode, setAutoClearLength, setLogs }
-  }, [allLogsMode, autoClearLength, logs])
+    return {
+      allLogsMode,
+      autoClearLength,
+      logs,
+      setAllLogsMode,
+      setAutoClearLength,
+      setLogs,
+      stopConsole,
+      setStopConsole
+    }
+  }, [allLogsMode, autoClearLength, logs, stopConsole])
   return (
     <HomePageContext.Provider value={value}>
       <div className="w-full h-full">

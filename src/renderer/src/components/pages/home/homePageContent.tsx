@@ -7,9 +7,10 @@ const HomePageContent = () => {
   const handleCopy = (textToCopy) => {
     navigator.clipboard.writeText(textToCopy)
   }
+
   // const [isHovered, setIsHovered] = useState(0)
   return (
-    <div className="flex flex-col  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111]">
+    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] ">
       {logs.map((item: any, index: any) => {
         return (
           <div
@@ -19,9 +20,9 @@ const HomePageContent = () => {
               handleCopy(obj)
             }}
             key={index}
-            className="hover:border hover:scale-[1.01] hover:rounded-md flex flex-col justify-center w-fit  gap-1.5 cursor-pointer"
+            className="hover:border  hover:rounded-md flex flex-col justify-center w-fit p-2!  gap-1.5 cursor-pointer hover:shadow-md"
           >
-            <p className="text-white border-b border-white w-fit" key={index}>
+            <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
               {item?.time}
             </p>
             <ReactJson
@@ -34,7 +35,7 @@ const HomePageContent = () => {
               src={item?.data}
               theme="summerfruit"
               name={item?.type}
-              collapsed={index == 0 ? false : 1}
+              collapsed={1}
               enableClipboard={true}
               displayDataTypes={true}
             />

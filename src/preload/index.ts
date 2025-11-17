@@ -14,6 +14,8 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('debugApi', {
       getDebugData: () => ipcRenderer.invoke('get-debug-data'),
       setAllLogsMode: (value: boolean) => ipcRenderer.invoke('set-all-logs-mode', value),
+      setStopConsole: (value: boolean) => ipcRenderer.invoke('set-stop-console', value),
+
       setAutoClearLength: (value: number) => ipcRenderer.invoke('set-auto-clear-length', value),
       clearLogs: () => ipcRenderer.invoke('clear-debug-data')
     })

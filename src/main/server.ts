@@ -5,7 +5,12 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
-export function startDebugServer(debugData: any, allLogsMode: any, autoClearLength: any) {
+export function startDebugServer(
+  debugData: any,
+  allLogsMode: any,
+  autoClearLength: any,
+  stopConsole: any
+) {
   const app = express()
   app.use(cors())
   app.use(bodyParser.json({ limit: '10mb' }))
@@ -16,7 +21,7 @@ export function startDebugServer(debugData: any, allLogsMode: any, autoClearLeng
     if (!payload) {
       return res.status(400).json({ error: 'Missing payload' })
     }
-    debugCopy(autoClearLength, debugData, allLogsMode, payload, type)
+    debugCopy(stopConsole, autoClearLength, debugData, allLogsMode, payload, type)
     return res.status(200).json({ isSuccess: true })
   })
 
@@ -34,6 +39,7 @@ export function startDebugServer(debugData: any, allLogsMode: any, autoClearLeng
 }
 
 function debugCopy(
+  stopConsole: any,
   autoClearLength: any,
   debugData: any,
   allLogsMode: any,
@@ -74,10 +80,12 @@ function debugCopy(
 ${dataString}
 
 `
-
-  if (allLogsMode()) {
-    debugData.push({ data: obj, type, time: `🕒 ${time}` })
+  if (!stopConsole()) {
+    if (allLogsMode()) {
+      debugData.push({ data: obj, type, time: `🕒 ${time}` })
+    }
   }
+
   // Avoid duplicates by checking existing block
   if (fs.existsSync(logFile)) {
     const fileContent = fs.readFileSync(logFile, 'utf8')
@@ -85,8 +93,11 @@ ${dataString}
       return false
     }
   }
-  if (!allLogsMode()) {
-    debugData.push({ data: obj, type, time: `🕒 ${time}` })
+
+  if (!stopConsole()) {
+    if (!allLogsMode()) {
+      debugData.push({ data: obj, type, time: `🕒 ${time}` })
+    }
   }
 
   fs.appendFileSync(logFile, block, 'utf8')

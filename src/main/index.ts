@@ -4,50 +4,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { startDebugServer } from './server'
 
-let debugData: any[] = [
-  {
-    type: 'company',
-    data: {
-      name: 'TechCorp',
-      departments: {
-        engineering: {
-          frontend: {
-            teamLead: 'Alice',
-            developers: [
-              { name: 'John', level: 'mid' },
-              { name: 'Emma', level: 'junior' }
-            ]
-          },
-          backend: {
-            teamLead: 'Tom',
-            developers: [
-              { name: 'Mike', level: 'senior' },
-              { name: 'Lisa', level: 'mid' }
-            ]
-          }
-        },
-        hr: {
-          manager: 'Sophia',
-          employees: 5
-        }
-      }
-    }
-  },
-  {
-    type: 'order',
-    data: {
-      orderId: 501,
-      customer: 'Michael',
-      items: [
-        { name: 'Keyboard', price: 30 },
-        { name: 'Mouse', price: 15 },
-        { name: 'Monitor', price: 150 }
-      ]
-    }
-  }
-]
+let debugData: any[] = []
 let allLogsMode = false
 let autoClearLength = 301
+let stopConsole = false
 
 function createWindow(): void {
   // Create the browser window.
@@ -100,7 +60,8 @@ app.whenReady().then(() => {
   startDebugServer(
     debugData,
     () => allLogsMode,
-    () => autoClearLength
+    () => autoClearLength,
+    () => stopConsole
   )
   createWindow()
 
@@ -125,6 +86,10 @@ app.on('window-all-closed', () => {
 ipcMain.handle('get-debug-data', () => debugData)
 ipcMain.handle('set-all-logs-mode', (_: any, value: boolean) => {
   allLogsMode = value
+})
+
+ipcMain.handle('set-stop-console', (_: any, value: boolean) => {
+  stopConsole = value
 })
 ipcMain.handle('set-auto-clear-length', (_: any, value: number) => {
   autoClearLength = value
