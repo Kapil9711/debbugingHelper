@@ -89,7 +89,7 @@ const HomePageFilters = ({
   }, [filter])
   return (
     <div className="fixed! top-[100px]! right-5!  w-[15%] mobile:hidden tabletS:hidden">
-      <p className="text-sm mb-1!">Found ({count})</p>
+      <p className="text-sm mb-1! text-white">Found ({count})</p>
       <input
         onBlur={() => {
           handleFilter(filter)
@@ -106,7 +106,7 @@ const HomePageFilters = ({
         onChange={(e) => setFilter(e.target.value)}
       />
       <div className="flex items-center gap-2 mt-2!">
-        <p className="text-sm">Remove Duplicate</p>
+        <p className="text-sm text-white">Remove Duplicate</p>
         <input
           className="h-4 w-4"
           type="checkbox"
