@@ -72,7 +72,7 @@ const HomePageFilters = ({ handleFilter, count, handleRemoveDuplicate, filterRef
     filterRef.current = filter
   }, [filter])
   return (
-    <div className="fixed! top-[100px]! right-5!  w-[15%] ">
+    <div className="fixed! top-[100px]! right-5!  w-[15%] mobile:hidden tabletS:hidden">
       <p className="text-sm mb-1!">Found ({count})</p>
       <input
         onBlur={() => {
