@@ -16,7 +16,7 @@ const HomePageContent = () => {
   }
 
   const filterRef = useRef('' as any)
-
+  const RemoveDublicateRef = useRef(false)
   const handleFilter = (filter: string) => {
     const userInput = filter
     const pattern = new RegExp(escapeRegex(userInput), 'i')
@@ -24,14 +24,19 @@ const HomePageContent = () => {
       const obj = JSON.stringify(item, null, 2)
       return pattern.test(obj)
     })
-    setFilterLogs(obj)
+    if (RemoveDublicateRef.current) {
+      handleRemoveDuplicate(true, obj)
+    } else {
+      setFilterLogs(obj)
+    }
   }
 
-  const handleRemoveDuplicate = (flag) => {
+  const handleRemoveDuplicate = (flag, logs: any) => {
     if (flag) {
       const arr: any = []
       const actualArr: any = []
-      filterLogs.forEach((item: any) => {
+      let filterArr = logs || filterLogs
+      filterArr.forEach((item: any) => {
         const obj = JSON.stringify(item.data, null, 2)
         if (!arr.includes(obj)) {
           arr.push(obj)
@@ -46,6 +51,10 @@ const HomePageContent = () => {
   }
 
   const [isHovered, setIsHovered] = useState(0)
+
+  useEffect(() => {
+    handleFilter(filterRef?.current)
+  }, [logs])
   return (
     <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative">
       <HomePageFilters
@@ -53,6 +62,7 @@ const HomePageContent = () => {
         handleFilter={handleFilter}
         handleRemoveDuplicate={handleRemoveDuplicate}
         filterRef={filterRef}
+        RemoveDublicateRef={RemoveDublicateRef}
       />
       <DataList
         logs={filterLogs}
@@ -64,7 +74,13 @@ const HomePageContent = () => {
   )
 }
 
-const HomePageFilters = ({ handleFilter, count, handleRemoveDuplicate, filterRef }: any) => {
+const HomePageFilters = ({
+  handleFilter,
+  count,
+  handleRemoveDuplicate,
+  filterRef,
+  RemoveDublicateRef
+}: any) => {
   const [filter, setFilter] = useState('')
   const [removeDuplicate, setRemoveDubplicate] = useState(false)
   useEffect(() => {
@@ -96,6 +112,7 @@ const HomePageFilters = ({ handleFilter, count, handleRemoveDuplicate, filterRef
           type="checkbox"
           checked={removeDuplicate}
           onChange={() => {
+            RemoveDublicateRef.current = !removeDuplicate
             setRemoveDubplicate(!removeDuplicate)
             handleRemoveDuplicate(!removeDuplicate)
           }}
