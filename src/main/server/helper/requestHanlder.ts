@@ -46,7 +46,20 @@ ${dataString}
 `
   if (!stopConsole()) {
     if (allLogsMode()) {
-      debugData.push({ data: obj, type, time: `🕒 ${time}` })
+      let flag = false
+
+      for (let item of debugData) {
+        const obj1 = JSON.stringify(item?.data, null, 2)
+        const obj2 = JSON.stringify(obj, null, 2)
+        if (obj1 == obj2) {
+          flag = true
+          break
+        }
+      }
+
+      if (!flag) {
+        debugData.push({ data: obj, type, time: `🕒 ${time}` })
+      }
     }
   }
 
@@ -60,7 +73,18 @@ ${dataString}
 
   if (!stopConsole()) {
     if (!allLogsMode()) {
-      debugData.push({ data: obj, type, time: `🕒 ${time}` })
+      let flag = false
+      for (let item of debugData) {
+        const obj1 = JSON.stringify(item?.data, null, 2)
+        const obj2 = JSON.stringify(obj, null, 2)
+        if (obj1 == obj2) {
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        debugData.push({ data: obj, type: JSON.stringify(type, null, 2), time: `🕒 ${time}` })
+      }
     }
   }
 

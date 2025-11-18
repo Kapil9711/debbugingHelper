@@ -51,7 +51,6 @@ const HomePageContent = () => {
   }
 
   const [isHovered, setIsHovered] = useState('')
-
   useEffect(() => {
     handleFilter(filterRef?.current)
   }, [logs])
@@ -105,7 +104,7 @@ const HomePageFilters = ({
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
       />
-      <div className="flex items-center gap-2 mt-2!">
+      {/* <div className="flex items-center gap-2 mt-2!">
         <p className="text-sm text-white">Remove Duplicate</p>
         <input
           className="h-4 w-4"
@@ -117,7 +116,7 @@ const HomePageFilters = ({
             handleRemoveDuplicate(!removeDuplicate)
           }}
         />
-      </div>
+      </div> */}
     </div>
   )
 }
