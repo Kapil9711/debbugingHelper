@@ -16,7 +16,7 @@ const HomePageContent = () => {
   }
 
   const filterRef = useRef('' as any)
-  const RemoveDublicateRef = useRef(false)
+  const RemoveDublicateRef = useRef(true)
   const handleFilter = (filter: string) => {
     const userInput = filter
     const pattern = new RegExp(escapeRegex(userInput), 'i')
@@ -82,7 +82,7 @@ const HomePageFilters = ({
   RemoveDublicateRef
 }: any) => {
   const [filter, setFilter] = useState('')
-  const [removeDuplicate, setRemoveDubplicate] = useState(false)
+  const [removeDuplicate, setRemoveDubplicate] = useState(true)
   useEffect(() => {
     handleFilter(filter)
     filterRef.current = filter
