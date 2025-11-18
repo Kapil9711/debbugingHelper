@@ -30,9 +30,30 @@ export function startDebugServer() {
     res.json({ isSuccess: true })
   })
 
-  app.post('/network', (req, res) => {
-    const payload = { data: req.body, type: 'networkRequest' }
-    state.debugData.push(payload)
+  app.post('/network', (req: any, res: any) => {
+    const { body, response, type, url, status, method, duration }: any = req.body
+    const time = new Date().toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'medium'
+    })
+    if (type == 'xhr-response') {
+      const payload = {
+        data: { type, url, status, response: JSON.parse(response), duration },
+        type: 'networkResponse',
+        time: `🕒 ${time}`
+      }
+      state.debugData.push(payload)
+    }
+
+    if (type == 'xhr-request') {
+      const payload = {
+        data: { type, url, method, body: JSON.parse(body) },
+        type: 'networkRequest',
+        time: `🕒 ${time}`
+      }
+      state.debugData.push(payload)
+    }
     res.json({ ok: true })
   })
 

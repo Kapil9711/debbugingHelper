@@ -5,6 +5,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './screen/homePage'
 import Settings from './screen/settings'
 import { Toaster } from 'react-hot-toast'
+import NetworkPage from './screen/networkPage'
 
 function App(): React.JSX.Element {
   return (
@@ -40,8 +41,8 @@ function App(): React.JSX.Element {
         {/* Layout Wrapper */}
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="network" element={<NetworkPage />} />
           <Route path="settings" element={<Settings />} />
-          {/* <Route path="logs" element={<Logs />} /> */}
 
           {/* 404 fallback */}
           <Route path="*" element={<div>Not Found</div>} />

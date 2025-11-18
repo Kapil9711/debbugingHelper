@@ -7,8 +7,8 @@ import { VscDebugConsole } from 'react-icons/vsc'
 
 import { IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
+
+import { GiNetworkBars } from 'react-icons/gi'
 
 const SideBar = () => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
@@ -64,7 +64,10 @@ const SideBar = () => {
   )
 }
 
-const sidebarData = [{ title: 'Console', icon: <VscDebugConsole />, url: '/' }]
+const sidebarData = [
+  { title: 'Console', icon: <VscDebugConsole />, url: '/' },
+  { title: 'Network', icon: <GiNetworkBars />, url: '/network' }
+]
 
 const SidebarContent = () => {
   const { isSidebarExpanded } = useThemeContext()
