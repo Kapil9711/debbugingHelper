@@ -37,49 +37,55 @@ export function startDebugServer() {
       dateStyle: 'medium',
       timeStyle: 'medium'
     })
-    if (type == 'xhr-response') {
-      let flag = false
-      for (let item of state.debugData) {
-        const obj1 = JSON.stringify(item?.data, null, 2)
-        const obj2 = JSON.stringify(
-          { type, url, status, response: JSON.parse(response), duration },
-          null,
-          2
-        )
-        if (obj1 == obj2) {
-          flag = true
-          break
-        }
-      }
 
-      const payload = {
-        data: { type, url, status, response: JSON.parse(response), duration },
-        type: 'networkResponse',
-        time: `🕒 ${time}`
-      }
-      if (!flag && !url?.includes('/event-tracking')) {
-        state.debugData.push(payload)
-      }
+    if (state?.debugDataNetwork?.length >= state?.autoClearLengthNetwork) {
+      state.debugDataNetwork.length = 0
     }
+    if (!state.stopNetwork) {
+      if (type == 'xhr-response') {
+        let flag = false
+        for (let item of state.debugDataNetwork) {
+          const obj1 = JSON.stringify(item?.data, null, 2)
+          const obj2 = JSON.stringify(
+            { type, url, status, response: JSON.parse(response), duration },
+            null,
+            2
+          )
+          if (obj1 == obj2) {
+            flag = true
+            break
+          }
+        }
 
-    if (type == 'xhr-request') {
-      let flag = false
-      for (let item of state.debugData) {
-        const obj1 = JSON.stringify(item?.data, null, 2)
-        const obj2 = JSON.stringify({ type, url, method, body: JSON.parse(body) }, null, 2)
-        if (obj1 == obj2) {
-          flag = true
-          break
+        const payload = {
+          data: { type, url, status, response: JSON.parse(response), duration },
+          type: 'networkResponse',
+          time: `🕒 ${time}`
+        }
+        if (!flag && !url?.includes('/event-tracking')) {
+          state.debugDataNetwork.push(payload)
         }
       }
 
-      const payload = {
-        data: { type, url, method, body: JSON.parse(body) },
-        type: 'networkRequest',
-        time: `🕒 ${time}`
-      }
-      if (!flag && !url?.includes('/event-tracking')) {
-        state.debugData.push(payload)
+      if (type == 'xhr-request') {
+        let flag = false
+        for (let item of state.debugDataNetwork) {
+          const obj1 = JSON.stringify(item?.data, null, 2)
+          const obj2 = JSON.stringify({ type, url, method, body: JSON.parse(body) }, null, 2)
+          if (obj1 == obj2) {
+            flag = true
+            break
+          }
+        }
+
+        const payload = {
+          data: { type, url, method, body: JSON.parse(body) },
+          type: 'networkRequest',
+          time: `🕒 ${time}`
+        }
+        if (!flag && !url?.includes('/event-tracking')) {
+          state.debugDataNetwork.push(payload)
+        }
       }
     }
     res.json({ ok: true })

@@ -12,5 +12,12 @@ declare global {
       onNewEntry?: (callback: (data: any) => void) => void
       clearLogs: () => Promise<any>
     }
+    debugApiNetwork: {
+      getDebugData: () => Promise<any>
+      setStopNetwork: (value: boolean) => Promise<void> // ← ADD THIS
+      setAutoClearLength: (value: number) => Promise<void> // ← ADD THIS
+      onNewEntry?: (callback: (data: any) => void) => void
+      clearLogsNetwork: () => Promise<any>
+    }
   }
 }
