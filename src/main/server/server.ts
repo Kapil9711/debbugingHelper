@@ -42,46 +42,72 @@ export function startDebugServer() {
       state.debugDataNetwork.length = 0
     }
     if (!state.stopNetwork) {
-      if (type == 'xhr-response') {
-        let flag = false
-        for (let item of state.debugDataNetwork) {
-          const obj1 = JSON.stringify(item?.data, null, 2)
-          const obj2 = JSON.stringify(
-            { type, url, status, response: JSON.parse(response), duration },
-            null,
-            2
-          )
-          if (obj1 == obj2) {
-            flag = true
-            break
-          }
-        }
+      // if (type == 'xhr-response') {
+      //   let flag = false
+      //   for (let item of state.debugDataNetwork) {
+      //     const obj1 = JSON.stringify(item?.data, null, 2)
+      //     const obj2 = JSON.stringify(
+      //       { type, url, status, response: JSON.parse(response), duration },
+      //       null,
+      //       2
+      //     )
+      //     if (obj1 == obj2) {
+      //       flag = true
+      //       break
+      //     }
+      //   }
 
-        const payload = {
-          data: { type, url, status, response: JSON.parse(response), duration },
-          type: 'networkResponse',
-          time: `🕒 ${time}`
-        }
-        if (!flag && !url?.includes('/event-tracking')) {
-          state.debugDataNetwork.push(payload)
-        }
-      }
+      //   const payload = {
+      //     data: { type, url, status, response: JSON.parse(response), duration },
+      //     type: 'networkResponse',
+      //     time: `🕒 ${time}`
+      //   }
+      //   if (!flag && !url?.includes('/event-tracking')) {
+      //     state.debugDataNetwork.push(payload)
+      //   }
+      // }
 
       if (type == 'xhr-request') {
         let flag = false
         for (let item of state.debugDataNetwork) {
           const obj1 = JSON.stringify(item?.data, null, 2)
-          const obj2 = JSON.stringify({ type, url, method, body: JSON.parse(body) }, null, 2)
+
+          let obj2 = ''
+          if (method == 'Get') {
+            obj2 = JSON.stringify({ type, url, method }, null, 2)
+          } else {
+            let ress
+            try {
+              ress = JSON.parse(body)
+            } catch (error) {
+              ress = body
+            }
+            obj2 = JSON.stringify({ type, url, method, body: ress }, null, 2)
+          }
           if (obj1 == obj2) {
             flag = true
             break
           }
         }
 
-        const payload = {
-          data: { type, url, method, body: JSON.parse(body) },
+        let ress
+        try {
+          ress = JSON.parse(body)
+        } catch (error) {
+          ress = body
+        }
+
+        let payload: any = {
+          data: { type, url, method, body: ress },
           type: 'networkRequest',
           time: `🕒 ${time}`
+        }
+        if (method == 'Get') {
+          payload = {
+            data: { type, url, method },
+            type: 'networkRequest',
+            time: `🕒 ${time}`
+          }
         }
         if (!flag && !url?.includes('/event-tracking')) {
           state.debugDataNetwork.push(payload)

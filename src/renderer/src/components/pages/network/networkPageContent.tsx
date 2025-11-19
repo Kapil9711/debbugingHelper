@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 
 const NetworkPageContent = () => {
-  const { logs } = useNetworkPageContext()
+  const { logs, setTestData } = useNetworkPageContext()
   const [filterLogs, setFilterLogs] = useState(logs)
   const handleCopy = async (textToCopy) => {
     await navigator.clipboard.writeText(textToCopy)
@@ -68,6 +68,7 @@ const NetworkPageContent = () => {
         setIsHovered={setIsHovered}
         isHovered={isHovered}
         handleCopy={handleCopy}
+        setTestData={setTestData}
       />
     </div>
   )
@@ -121,7 +122,7 @@ const HomePageFilters = ({
   )
 }
 
-const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
+const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) => {
   return (
     <>
       {logs.map((item: any, index: any) => {
@@ -145,6 +146,18 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
                 className="border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
               >
                 Copy
+              </button>
+              <button
+                style={{ display: isHovered == index ? 'block' : 'none' }}
+                onClick={() => {
+                  setTestData(item?.data)
+                  console.log(item?.data)
+                  // const obj = JSON.stringify(item?.data, null, 2)
+                  // handleCopy(obj)
+                }}
+                className="border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
+              >
+                Test
               </button>
             </div>
 

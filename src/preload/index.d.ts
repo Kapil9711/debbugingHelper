@@ -18,6 +18,7 @@ declare global {
       setAutoClearLength: (value: number) => Promise<void> // ← ADD THIS
       onNewEntry?: (callback: (data: any) => void) => void
       clearLogsNetwork: () => Promise<any>
+      testRequest: (req: any) => any
     }
   }
 }

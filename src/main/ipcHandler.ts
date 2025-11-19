@@ -46,4 +46,44 @@ export function registerIPCHandlers() {
     state.debugDataNetwork.length = 0
     return true
   })
+
+  // network
+
+  ipcMain.handle('run-request', async (_: any, req: any) => {
+    console.log(req)
+    try {
+      const res = await fetch(req.url, {
+        method: req.method,
+        headers: { 'Content-Type': 'application/json' },
+        body: req.method === 'GET' || req.method === 'HEAD' ? undefined : JSON.stringify(req.body)
+      })
+
+      const text = await res.text()
+      let data
+
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = text
+      }
+
+      console.log({
+        status: res.status,
+        ok: res.ok,
+        data
+      })
+
+      return {
+        status: res.status,
+        ok: res.ok,
+        data
+      }
+    } catch (err: any) {
+      console.log(err)
+      return {
+        error: true,
+        message: err.message
+      }
+    }
+  })
 }

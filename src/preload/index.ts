@@ -24,7 +24,8 @@ if (process.contextIsolated) {
       setStopNetwork: (value: boolean) => ipcRenderer.invoke('set-stop-network', value),
       setAutoClearLength: (value: number) =>
         ipcRenderer.invoke('set-auto-clear-length-network', value),
-      clearLogsNetwork: () => ipcRenderer.invoke('clear-debug-data-network')
+      clearLogsNetwork: () => ipcRenderer.invoke('clear-debug-data-network'),
+      testRequest: (req) => ipcRenderer.invoke('run-request', req)
     })
   } catch (error) {
     console.error(error)
