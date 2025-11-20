@@ -7,6 +7,8 @@ import { broadcast } from '../broadcast'
 
 export function registerNetworkHandlers() {
   ipcMain.handle(Channels.network.GetLogs, () => networkStore.logs)
+  ipcMain.handle(Channels.network.GetPause, () => networkStore.pauseNetwork)
+  ipcMain.handle(Channels.network.GetAutoLength, () => networkStore.autoClearLength)
   ipcMain.handle(Channels.network.SetPause, (_e, value: boolean) => {
     networkStore.pauseNetwork = value
     broadcast(Channels.events.NetworkUpdated, { type: NetworkEventType.Pause, payload: value })

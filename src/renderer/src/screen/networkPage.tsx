@@ -50,7 +50,11 @@ const NetworkPage = ({}) => {
   useEffect(() => {
     const loadInitial = async () => {
       const data = await window.api.network.getLogs()
+      const pause = await window.api.network.getPause()
+      const autoLength = await window.api.network.getAutoLength()
       setLogs(data.reverse())
+      setAutoClearLength(autoLength)
+      setPauseNetwork(pause)
     }
     loadInitial()
     const unsubscribe =

@@ -3,16 +3,8 @@ import Header from '../../header'
 import { FaPauseCircle, FaPlay } from 'react-icons/fa'
 
 const HomePageHeader = () => {
-  const {
-    allLogsMode,
-    setAllLogsMode,
-    logs,
-    autoClearLength,
-    setAutoClearLength,
-    setLogs,
-    stopConsole,
-    setStopConsole
-  } = useHomePageContext()
+  const { logs, autoClearLength, setAutoClearLength, setLogs, pauseConsole, setPauseConsole } =
+    useHomePageContext()
   const { theme } = useHomePageContext()
 
   return (
@@ -32,11 +24,12 @@ const HomePageHeader = () => {
             </div> */}
             <button
               onClick={() => {
-                setStopConsole((prev) => !prev)
+                setPauseConsole((prev) => !prev)
+                window.api.console.setPause(!pauseConsole)
               }}
               className=" h-[30px] w-[50px] bg-green-400 rounded-md uppercase text-xs cursor-pointer flex justify-center items-center"
             >
-              {stopConsole ? (
+              {pauseConsole ? (
                 <FaPlay className="text-gray-900" size={18} />
               ) : (
                 <FaPauseCircle className="text-gray-900" size={22} />
@@ -59,9 +52,11 @@ const HomePageHeader = () => {
               if (Number(e.target.value)) {
                 if (Number(e.target.value) >= 1 && e.target.value?.length < 4) {
                   setAutoClearLength(Number(e.target.value))
+                  window.api.console.setAutoClearLength(Number(e.target.value))
                 }
               } else {
                 setAutoClearLength(0)
+                window.api.console.setAutoClearLength(0)
               }
             }}
           />
@@ -74,8 +69,8 @@ const HomePageHeader = () => {
           </div>
           <button
             onClick={async () => {
-              await window.debugApi.clearLogs()
-              setLogs([]) // Clear UI immediately
+              setLogs([])
+              window.api.console.clearLogs()
             }}
             className="bg-red-600 w-28 p-1.5! rounded-md leading-[1] py-2! uppercase text-xs cursor-pointer text-white"
           >

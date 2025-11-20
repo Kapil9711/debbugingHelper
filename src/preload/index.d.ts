@@ -18,14 +18,19 @@ declare global {
     api: {
       console: {
         getLogs: () => Promise<any[]>
+        getPause: () => Promise<any>
+        getAutoLength: () => Promise<any>
         setUseAsConsole: (value: boolean) => Promise<void>
         setPause: (value: boolean) => Promise<void>
         setAutoClearLength: (value: number) => Promise<void>
         clearLogs: () => Promise<void>
+
         onUpdated?: (callback: (data: any) => void) => Unsubscribe
       }
       network: {
         getLogs: () => Promise<any[]>
+        getPause: () => Promise<any>
+        getAutoLength: () => Promise<any>
         runRequest: (req: any) => Promise<any>
         setPause: (value: boolean) => Promise<void>
         setAutoClearLength: (value: number) => Promise<void>

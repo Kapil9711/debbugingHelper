@@ -1,3 +1,6 @@
+import { Channels } from '../../../shared/channels'
+import { ConsoleEventType } from '../../../shared/eventType'
+import { broadcast } from '../../ipc/broadcast'
 import { consoleStore } from '../../services/consoleStore'
 import { formatTime } from '../utlis/time'
 import isEqual from 'lodash/isEqual'
@@ -15,6 +18,10 @@ export const createConsole = async (reqData) => {
   if (!consoleStore.pauseConsole) {
     if (!isLogExist()) {
       consoleStore.push({ type, data: payload, time })
+      broadcast(Channels.events.ConsoleUpdated, {
+        type: ConsoleEventType.NewLog,
+        payload: { type, data: payload, time }
+      })
       return { isSuccess: true, msg: 'Log Added Successfully' }
     }
     return { isSuccess: false, msg: 'Log Already Exists' }

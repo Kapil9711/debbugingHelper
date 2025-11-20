@@ -6,6 +6,8 @@ type Unsubscribe = () => void
 
 export const networkApi = {
   getLogs: () => ipcRenderer.invoke(Channels.network.GetLogs) as Promise<any[]>,
+  getPause: () => ipcRenderer.invoke(Channels.network.GetPause) as Promise<any[]>,
+  getAutoLength: () => ipcRenderer.invoke(Channels.network.GetAutoLength) as Promise<any[]>,
   setPause: (value: boolean) => ipcRenderer.invoke(Channels.network.SetPause, value),
   setAutoClearLength: (value: number) =>
     ipcRenderer.invoke(Channels.network.SetAutoClearLength, value),

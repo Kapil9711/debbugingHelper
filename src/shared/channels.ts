@@ -5,10 +5,14 @@ export const Channels = {
     SetUseAsConsole: 'console:set-use-as-console',
     SetPause: 'console:set-pause',
     SetAutoClearLength: 'console:set-auto-clear-length',
-    ClearLogs: 'console:clear-logs'
+    ClearLogs: 'console:clear-logs',
+    GetPause: 'console:get-pause',
+    GetAutoLength: 'console:get-auto-length'
   },
   network: {
     GetLogs: 'network:get-logs',
+    GetPause: 'network:get-Pause',
+    GetAutoLength: 'network:get-auto-length',
     SetPause: 'network:set-pause',
     SetAutoClearLength: 'network:set-auto-clear-length',
     ClearLogs: 'network:clear-logs',

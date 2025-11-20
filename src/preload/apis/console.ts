@@ -6,8 +6,11 @@ type Unsubscribe = () => void
 
 export const consoleApi = {
   getLogs: () => ipcRenderer.invoke(Channels.console.GetLogs) as Promise<any[]>,
+  getPause: () => ipcRenderer.invoke(Channels.console.GetPause) as Promise<any[]>,
+  getAutoLength: () => ipcRenderer.invoke(Channels.console.GetAutoLength) as Promise<any[]>,
+
   setUseAsConsole: (value: boolean) => ipcRenderer.invoke(Channels.console.SetUseAsConsole, value),
-  setPauseConsole: (value: boolean) => ipcRenderer.invoke(Channels.console.SetPause, value),
+  setPause: (value: boolean) => ipcRenderer.invoke(Channels.console.SetPause, value),
   setAutoClearLength: (value: number) =>
     ipcRenderer.invoke(Channels.console.SetAutoClearLength, value),
   clearLogs: () => ipcRenderer.invoke(Channels.console.ClearLogs),

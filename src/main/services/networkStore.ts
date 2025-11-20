@@ -1,4 +1,5 @@
 import { Channels } from '../../shared/channels'
+import { NetworkEventType } from '../../shared/eventType'
 import { broadcast } from '../ipc/broadcast'
 
 export const networkStore = {
@@ -10,7 +11,10 @@ export const networkStore = {
     this.logs.push(entry)
     if (this.logs.length > this.autoClearLength) {
       this.logs = this.logs.slice(-this.autoClearLength)
-      broadcast(Channels.events.NetworkUpdated, { type: 'autoClear', payload: this.logs })
+      broadcast(Channels.events.NetworkUpdated, {
+        type: NetworkEventType.AutoClear,
+        payload: this.logs
+      })
     }
   },
 

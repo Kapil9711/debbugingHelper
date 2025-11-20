@@ -1,50 +1,74 @@
 import HomePageHeader from '@renderer/components/pages/home/homePageHeader'
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import HomePageContent from '@renderer/components/pages/home/homePageContent'
+import { ConsoleEventType } from '@shared/eventType'
+import toast from 'react-hot-toast'
 
 const HomePageContext = createContext(null as any)
 export const useHomePageContext = () => useContext(HomePageContext)
 const HomePage = ({}) => {
   const [logs, setLogs] = useState([] as any)
-  const [allLogsMode, setAllLogsMode] = useState(true)
   const [autoClearLength, setAutoClearLength] = useState(301)
-  const [stopConsole, setStopConsole] = useState(false)
+  const [pauseConsole, setPauseConsole] = useState(false)
+  const handleConsoleEvent = useCallback((event: any) => {
+    if (!event) return
+    switch (event.type) {
+      case ConsoleEventType.NewLog:
+        setLogs((prev) => [event.payload, ...prev])
+        break
 
-  const loadData = async () => {
-    const data = await window.api.console.getLogs()
-    setLogs([...data].reverse())
-  }
+      case ConsoleEventType.Length:
+        setAutoClearLength(event.payload as number)
+        toast.success('Length Updated Successfully')
+        break
 
-  useEffect(() => {
-    loadData()
-    const interval = setInterval(loadData, 1000)
-    return () => clearInterval(interval)
+      case ConsoleEventType.Pause:
+        setPauseConsole(Boolean(event.payload))
+        toast.success(event.payload ? 'Console Paused' : 'Console Started')
+        break
+
+      case ConsoleEventType.ClearLog:
+        setLogs(Array.isArray(event.payload) ? (event.payload as any[]) : [])
+        toast.success('Log Clear Successfully')
+        break
+
+      case ConsoleEventType.AutoClear:
+        // payload is trimmed logs array
+        setLogs(Array.isArray(event.payload) ? (event.payload as any[]) : [])
+        break
+
+      default:
+        console.warn('Unknown network event type', event)
+    }
   }, [])
 
-  // useEffect(() => {
-  //   window.debugApi.setAllLogsMode(allLogsMode)
-  // }, [allLogsMode])
-
-  // useEffect(() => {
-  //   window.debugApi.setAutoClearLength(Number(autoClearLength) || 1)
-  // }, [autoClearLength])
-
-  // useEffect(() => {
-  //   window.debugApi.setStopConsole(stopConsole)
-  // }, [stopConsole])
+  useEffect(() => {
+    const loadInitial = async () => {
+      const data = await window.api.console.getLogs()
+      const pause = await window.api.console.getPause()
+      const autoLength = await window.api.console.getAutoLength()
+      setLogs(data.reverse())
+      setAutoClearLength(autoLength)
+      setPauseConsole(pause)
+    }
+    loadInitial()
+    const unsubscribe =
+      window.api.console.onUpdated?.((payload) => {
+        handleConsoleEvent(payload)
+      }) ?? (() => {})
+    return () => unsubscribe()
+  }, [])
 
   const value = useMemo(() => {
     return {
-      allLogsMode,
       autoClearLength,
       logs,
-      setAllLogsMode,
       setAutoClearLength,
       setLogs,
-      stopConsole,
-      setStopConsole
+      pauseConsole,
+      setPauseConsole
     }
-  }, [allLogsMode, autoClearLength, logs, stopConsole])
+  }, [autoClearLength, logs, pauseConsole])
   return (
     <HomePageContext.Provider value={value}>
       <div className="w-full h-full">
