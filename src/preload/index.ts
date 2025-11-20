@@ -4,6 +4,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { consoleApi } from './apis/console'
 import { networkApi } from './apis/network'
 import { Channels } from '../shared/channels'
+import { requestApi } from './apis/request'
 
 function flattenChannelValues(obj: any): string[] {
   const out: string[] = []
@@ -37,6 +38,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('api', {
       console: consoleApi,
       network: networkApi,
+      request: requestApi,
       // low-level invoke if you need custom access (still guarded)
       invoke: safeInvoke
     })
@@ -52,6 +54,7 @@ if (process.contextIsolated) {
   window.api = {
     console: consoleApi,
     network: networkApi,
-    invoke: safeInvoke
+    invoke: safeInvoke,
+    request: requestApi
   }
 }

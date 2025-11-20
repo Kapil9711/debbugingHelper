@@ -41,6 +41,12 @@ declare global {
         clearLogs: () => Promise<void>
         onUpdated?: (callback: (data: any) => void) => Unsubscribe
       }
+      request: {
+        getRequest: (query: string) => Promise<any>
+        setRequest: (request: any) => Promise<any>
+        deleteRequest: (query: string) => Promise<any>
+        updateRequest: (query: string) => Promise<any>
+      }
       /**
        * Low-level guarded invoke (optional)
        */

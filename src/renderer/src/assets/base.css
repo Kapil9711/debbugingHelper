@@ -12,11 +12,11 @@
   --bg-sidebar: #000608;
   --bg-header: #000608;
   --bg-content: #101111;
-  --text: #ffffff;
+  --text: #ffffff !important;
   --rev-bg-sidebar: #f6f5f5;
   --rev-bg-header: #f6f5f5;
   --rev-bg-content: #fdfbfb;
-  --rev-text: #0b0b0b;
+  --rev-text: #0b0b0b !important;
 }
 
 /* Dark theme */
@@ -24,11 +24,11 @@
   --bg-sidebar: #f6f5f5;
   --bg-header: #f6f5f5;
   --bg-content: #fdfbfb;
-  --text: #0b0b0b;
+  --text: #0b0b0b !important;
   --rev-bg-sidebar: #000608;
   --rev-bg-header: #000608;
   --rev-bg-content: #101111;
-  --rev-text: #ffffff;
+  --rev-text: #ffffff !important;
 }
 
 html,

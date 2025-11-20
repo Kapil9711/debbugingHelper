@@ -3,7 +3,12 @@ import { NetworkEventType } from '../../shared/eventType'
 import { broadcast } from '../ipc/broadcast'
 
 export const networkStore = {
-  logs: [] as any,
+  logs: [
+    {
+      data: { method: 'Get', url: 'https://api.testgemlay.com/customer_review' },
+      type: 'networkRequest'
+    }
+  ] as any,
   autoClearLength: 301,
   pauseNetwork: false,
   searchString: '',

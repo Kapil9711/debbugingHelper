@@ -22,9 +22,16 @@ export const Channels = {
     ClearLogs: 'network:clear-logs',
     RunRequest: 'network:run-request'
   },
+  request: {
+    GetRequest: 'request:get-request',
+    SetRequest: 'request:set-request',
+    DeleteRequest: 'request:delete-request',
+    UpdateRequest: 'request:update-request'
+  },
   events: {
     ConsoleUpdated: 'event:console-updated',
-    NetworkUpdated: 'event:network-updated'
+    NetworkUpdated: 'event:network-updated',
+    RequestUpdated: 'event:request-updated'
   }
 } as const
 
