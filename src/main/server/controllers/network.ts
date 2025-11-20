@@ -1,4 +1,5 @@
 import { Channels } from '../../../shared/channels'
+import { NetworkEventType } from '../../../shared/eventType'
 import { broadcast } from '../../ipc/broadcast'
 import { networkStore } from '../../services/networkStore'
 import { formatTime } from '../utlis/time'
@@ -52,7 +53,7 @@ export const createNetwork = async (reqData) => {
         }
 
         networkStore.push(payload)
-        broadcast(Channels.events.NetworkUpdated, { type: 'newLog', payload })
+        broadcast(Channels.events.NetworkUpdated, { type: NetworkEventType.NewLog, payload })
         return { isSuccess: true, msg: 'Log Added Successfull' }
       }
 

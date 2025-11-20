@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import NetworkPageHeader from '@renderer/components/pages/network/networkPageHeader'
 import NetworkPageContent from '@renderer/components/pages/network/networkPageContent'
 import RequestTester from '@renderer/components/pages/network/testRequest'
 import toast from 'react-hot-toast'
+import { NetworkEventType } from '../../../shared/eventType'
 
 const NetworkPageContext = createContext(null as any)
 export const useNetworkPageContext = () => useContext(NetworkPageContext)
@@ -13,6 +14,39 @@ const NetworkPage = ({}) => {
   const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
 
+  const handleNetworkEvent = useCallback((event: any) => {
+    if (!event) return
+
+    switch (event.type) {
+      case NetworkEventType.NewLog:
+        setLogs((prev) => [event.payload, ...prev])
+        break
+
+      case NetworkEventType.Length:
+        setAutoClearLength(event.payload as number)
+        toast.success('Length Updated Successfully')
+        break
+
+      case NetworkEventType.Pause:
+        setPauseNetwork(Boolean(event.payload))
+        toast.success(event.payload ? 'Network Paused' : 'Network Started')
+        break
+
+      case NetworkEventType.ClearLog:
+        setLogs(Array.isArray(event.payload) ? (event.payload as any[]) : [])
+        toast.success('Log Clear Successfully')
+        break
+
+      case NetworkEventType.AutoClear:
+        // payload is trimmed logs array
+        setLogs(Array.isArray(event.payload) ? (event.payload as any[]) : [])
+        break
+
+      default:
+        console.warn('Unknown network event type', event)
+    }
+  }, [])
+
   useEffect(() => {
     const loadInitial = async () => {
       const data = await window.api.network.getLogs()
@@ -20,30 +54,8 @@ const NetworkPage = ({}) => {
     }
     loadInitial()
     const unsubscribe =
-      window.api.network.onUpdated?.(({ type, payload }) => {
-        if (type == 'newLog') {
-          setLogs((prev) => [payload, ...prev])
-        }
-        if (type == 'length') {
-          toast.success('Length Updated Successfully')
-          setAutoClearLength(payload)
-        }
-        if (type == 'pause') {
-          if (payload) {
-            toast.success('Network Paused')
-          } else {
-            toast.success('Network Started')
-          }
-          setPauseNetwork(payload)
-        }
-        if (type == 'clearLog') {
-          toast.success('Log Clear Successfully')
-          setLogs(payload)
-        }
-        if (type == 'autoClear') {
-          // toast.success('Auto Clear Successfully')
-          setLogs(payload)
-        }
+      window.api.network.onUpdated?.((payload) => {
+        handleNetworkEvent(payload)
       }) ?? (() => {})
     return () => unsubscribe()
   }, [])
