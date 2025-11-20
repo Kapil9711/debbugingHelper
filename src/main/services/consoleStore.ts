@@ -10,6 +10,7 @@ export const consoleStore = {
   useAsConsole: false,
   autoClearLength: 301,
   pauseConsole: false,
+  searchString: '',
 
   push(entry: DebugEntry) {
     this.logs.push(entry)

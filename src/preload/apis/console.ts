@@ -11,6 +11,8 @@ export const consoleApi = {
 
   setUseAsConsole: (value: boolean) => ipcRenderer.invoke(Channels.console.SetUseAsConsole, value),
   setPause: (value: boolean) => ipcRenderer.invoke(Channels.console.SetPause, value),
+  setSearchString: (value: string) => ipcRenderer.invoke(Channels.console.SetSearchString, value),
+  getSearchString: () => ipcRenderer.invoke(Channels.console.GetSearchString),
   setAutoClearLength: (value: number) =>
     ipcRenderer.invoke(Channels.console.SetAutoClearLength, value),
   clearLogs: () => ipcRenderer.invoke(Channels.console.ClearLogs),

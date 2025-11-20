@@ -13,6 +13,7 @@ const NetworkPage = ({}) => {
   const [autoClearLength, setAutoClearLength] = useState(301)
   const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
+  const [filter, setFilter] = useState('')
   const handleNetworkEvent = useCallback((event: any) => {
     if (!event) return
 
@@ -51,6 +52,8 @@ const NetworkPage = ({}) => {
       const data = await window.api.network.getLogs()
       const pause = await window.api.network.getPause()
       const autoLength = await window.api.network.getAutoLength()
+      const searchString = await window.api.network.getSearchString()
+      setFilter(searchString)
       setLogs(data.reverse())
       setAutoClearLength(autoLength)
       setPauseNetwork(pause)
@@ -72,9 +75,11 @@ const NetworkPage = ({}) => {
       pauseNetwork,
       setPauseNetwork,
       testData,
-      setTestData
+      setTestData,
+      filter,
+      setFilter
     }
-  }, [autoClearLength, logs, pauseNetwork, testData])
+  }, [autoClearLength, logs, pauseNetwork, testData, filter])
   return (
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">

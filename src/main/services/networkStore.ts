@@ -6,6 +6,7 @@ export const networkStore = {
   logs: [] as any,
   autoClearLength: 301,
   pauseNetwork: false,
+  searchString: '',
 
   push(entry: any) {
     this.logs.push(entry)

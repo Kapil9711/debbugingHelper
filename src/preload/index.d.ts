@@ -22,6 +22,8 @@ declare global {
         getAutoLength: () => Promise<any>
         setUseAsConsole: (value: boolean) => Promise<void>
         setPause: (value: boolean) => Promise<void>
+        setSearchString: (value: string) => Promise<void>
+        getSearchString: () => Promise<string>
         setAutoClearLength: (value: number) => Promise<void>
         clearLogs: () => Promise<void>
 
@@ -30,6 +32,8 @@ declare global {
       network: {
         getLogs: () => Promise<any[]>
         getPause: () => Promise<any>
+        setSearchString: (value: string) => Promise<void>
+        getSearchString: () => Promise<string>
         getAutoLength: () => Promise<any>
         runRequest: (req: any) => Promise<any>
         setPause: (value: boolean) => Promise<void>

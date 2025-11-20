@@ -3,7 +3,8 @@ export const NetworkEventType = {
   Length: 'length',
   Pause: 'pause',
   ClearLog: 'clearLog',
-  AutoClear: 'autoClear'
+  AutoClear: 'autoClear',
+  searchString: 'searchString'
 }
 
 export const ConsoleEventType = {
@@ -11,5 +12,6 @@ export const ConsoleEventType = {
   Length: 'length',
   Pause: 'pause',
   ClearLog: 'clearLog',
-  AutoClear: 'autoClear'
+  AutoClear: 'autoClear',
+  searchString: 'searchString'
 }

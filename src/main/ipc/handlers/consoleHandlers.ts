@@ -9,6 +9,15 @@ export function registerConsoleHandlers() {
   ipcMain.handle(Channels.console.GetPause, () => consoleStore.pauseConsole)
   ipcMain.handle(Channels.console.GetAutoLength, () => consoleStore.autoClearLength)
 
+  ipcMain.handle(Channels.console.GetSearchString, () => consoleStore.searchString)
+  ipcMain.handle(Channels.console.SetSearchString, (_: any, value: string) => {
+    consoleStore.searchString = value
+    broadcast(Channels.events.ConsoleUpdated, {
+      type: ConsoleEventType.searchString,
+      payload: value
+    })
+  })
+
   ipcMain.handle(Channels.console.SetUseAsConsole, (_e, value: boolean) => {
     consoleStore.useAsConsole = value
     // broadcast(Channels.events.ConsoleUpdated, { type: ConsoleEventType.Pause, payload: value })

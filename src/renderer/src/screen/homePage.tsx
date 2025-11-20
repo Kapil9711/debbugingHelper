@@ -10,6 +10,8 @@ const HomePage = ({}) => {
   const [logs, setLogs] = useState([] as any)
   const [autoClearLength, setAutoClearLength] = useState(301)
   const [pauseConsole, setPauseConsole] = useState(false)
+  const [filter, setFilter] = useState('')
+
   const handleConsoleEvent = useCallback((event: any) => {
     if (!event) return
     switch (event.type) {
@@ -37,6 +39,10 @@ const HomePage = ({}) => {
         setLogs(Array.isArray(event.payload) ? (event.payload as any[]) : [])
         break
 
+      // case ConsoleEventType.searchString:
+      //   setFilter(event.payload)
+      //   break
+
       default:
         console.warn('Unknown network event type', event)
     }
@@ -47,6 +53,8 @@ const HomePage = ({}) => {
       const data = await window.api.console.getLogs()
       const pause = await window.api.console.getPause()
       const autoLength = await window.api.console.getAutoLength()
+      const searchString = await window.api.console.getSearchString()
+      setFilter(searchString)
       setLogs(data.reverse())
       setAutoClearLength(autoLength)
       setPauseConsole(pause)
@@ -66,9 +74,11 @@ const HomePage = ({}) => {
       setAutoClearLength,
       setLogs,
       pauseConsole,
-      setPauseConsole
+      setPauseConsole,
+      filter,
+      setFilter
     }
-  }, [autoClearLength, logs, pauseConsole])
+  }, [autoClearLength, logs, pauseConsole, filter])
   return (
     <HomePageContext.Provider value={value}>
       <div className="w-full h-full">

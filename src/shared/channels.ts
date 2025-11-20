@@ -7,10 +7,14 @@ export const Channels = {
     SetAutoClearLength: 'console:set-auto-clear-length',
     ClearLogs: 'console:clear-logs',
     GetPause: 'console:get-pause',
-    GetAutoLength: 'console:get-auto-length'
+    GetAutoLength: 'console:get-auto-length',
+    GetSearchString: 'console:get-search-string',
+    SetSearchString: 'console:set-search-string'
   },
   network: {
     GetLogs: 'network:get-logs',
+    GetSearchString: 'network:get-search-string',
+    SetSearchString: 'network:set-search-string',
     GetPause: 'network:get-Pause',
     GetAutoLength: 'network:get-auto-length',
     SetPause: 'network:set-pause',

@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 
 const HomePageContent = () => {
-  const { logs } = useHomePageContext()
+  const { logs, filter, setFilter } = useHomePageContext()
   const [filterLogs, setFilterLogs] = useState(logs)
   const handleCopy = async (textToCopy) => {
     await navigator.clipboard.writeText(textToCopy)
@@ -62,6 +62,8 @@ const HomePageContent = () => {
         handleRemoveDuplicate={handleRemoveDuplicate}
         filterRef={filterRef}
         RemoveDublicateRef={RemoveDublicateRef}
+        filter={filter}
+        setFilter={setFilter}
       />
       <DataList
         logs={filterLogs}
@@ -73,18 +75,11 @@ const HomePageContent = () => {
   )
 }
 
-const HomePageFilters = ({
-  handleFilter,
-  count,
-  handleRemoveDuplicate,
-  filterRef,
-  RemoveDublicateRef
-}: any) => {
-  const [filter, setFilter] = useState('')
-  const [removeDuplicate, setRemoveDubplicate] = useState(true)
+const HomePageFilters = ({ handleFilter, count, filterRef, filter, setFilter }: any) => {
   useEffect(() => {
     handleFilter(filter)
     filterRef.current = filter
+    // window.api.console.setSearchString(filter)
   }, [filter])
   return (
     <div className="fixed! top-[100px]! right-5!  w-[15%] mobile:hidden tabletS:hidden">
@@ -102,7 +97,10 @@ const HomePageFilters = ({
         className="px-3! bg-gray-300 text-gray-900 text-sm font-bold h-8 w-full rounded-md"
         type="text"
         value={filter}
-        onChange={(e) => setFilter(e.target.value)}
+        onChange={(e) => {
+          setFilter(e.target.value)
+          window.api.console.setSearchString(e.target.value)
+        }}
       />
       {/* <div className="flex items-center gap-2 mt-2!">
         <p className="text-sm text-white">Remove Duplicate</p>
