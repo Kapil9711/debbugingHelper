@@ -1,0 +1,21 @@
+// src/preload/apis/console.ts
+import { ipcRenderer, IpcRendererEvent } from 'electron'
+import { Channels } from '../../shared/channels'
+
+type Unsubscribe = () => void
+
+export const consoleApi = {
+  getLogs: () => ipcRenderer.invoke(Channels.console.GetLogs) as Promise<any[]>,
+  setUseAsConsole: (value: boolean) => ipcRenderer.invoke(Channels.console.SetUseAsConsole, value),
+  setPauseConsole: (value: boolean) => ipcRenderer.invoke(Channels.console.SetPause, value),
+  setAutoClearLength: (value: number) =>
+    ipcRenderer.invoke(Channels.console.SetAutoClearLength, value),
+  clearLogs: () => ipcRenderer.invoke(Channels.console.ClearLogs),
+
+  // optional subscription API if you broadcast events from main
+  onUpdated: (cb: (payload: any) => void): Unsubscribe => {
+    const listener = (_: IpcRendererEvent, payload: any) => cb(payload)
+    ipcRenderer.on('event:console-updated', listener)
+    return () => ipcRenderer.removeListener('event:console-updated', listener)
+  }
+}

@@ -1,0 +1,24 @@
+// src/shared/channels.ts
+export const Channels = {
+  console: {
+    GetLogs: 'console:get-logs',
+    SetUseAsConsole: 'console:set-use-as-console',
+    SetPause: 'console:set-pause',
+    SetAutoClearLength: 'console:set-auto-clear-length',
+    ClearLogs: 'console:clear-logs'
+  },
+  network: {
+    GetLogs: 'network:get-logs',
+    SetPause: 'network:set-pause',
+    SetAutoClearLength: 'network:set-auto-clear-length',
+    ClearLogs: 'network:clear-logs',
+    RunRequest: 'network:run-request'
+  },
+  events: {
+    ConsoleUpdated: 'event:console-updated',
+    NetworkUpdated: 'event:network-updated'
+  }
+} as const
+
+export type Channels = typeof Channels
+export type ChannelValue = Channels[keyof Channels][keyof Channels[keyof Channels]]

@@ -1,38 +1,57 @@
+// src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { consoleApi } from './apis/console'
+import { networkApi } from './apis/network'
+import { Channels } from '../shared/channels'
 
-// Custom APIs for renderer
-const api = {}
+function flattenChannelValues(obj: any): string[] {
+  const out: string[] = []
+  for (const val of Object.values(obj)) {
+    if (val && typeof val === 'object') {
+      out.push(...flattenChannelValues(val))
+    } else if (typeof val === 'string') {
+      out.push(val)
+    }
+  }
+  return out
+}
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+const allowedChannels = new Set<string>(flattenChannelValues(Channels))
+
+// low-level guarded invoke (optional utility)
+const safeInvoke = (channel: string, ...args: any[]) => {
+  if (!allowedChannels.has(channel)) {
+    throw new Error(`Attempt to invoke forbidden IPC channel: ${channel}`)
+  }
+  return ipcRenderer.invoke(channel, ...args)
+}
+
+// Expose APIs safely when contextIsolation is enabled (recommended)
 if (process.contextIsolated) {
   try {
+    // expose toolkit-provided `electron` helpers (if you rely on them)
     contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-    contextBridge.exposeInMainWorld('debugApi', {
-      getDebugData: () => ipcRenderer.invoke('get-debug-data'),
-      setAllLogsMode: (value: boolean) => ipcRenderer.invoke('set-all-logs-mode', value),
-      setStopConsole: (value: boolean) => ipcRenderer.invoke('set-stop-console', value),
 
-      setAutoClearLength: (value: number) => ipcRenderer.invoke('set-auto-clear-length', value),
-      clearLogs: () => ipcRenderer.invoke('clear-debug-data')
-    })
-    contextBridge.exposeInMainWorld('debugApiNetwork', {
-      getDebugData: () => ipcRenderer.invoke('get-debug-data-network'),
-      setStopNetwork: (value: boolean) => ipcRenderer.invoke('set-stop-network', value),
-      setAutoClearLength: (value: number) =>
-        ipcRenderer.invoke('set-auto-clear-length-network', value),
-      clearLogsNetwork: () => ipcRenderer.invoke('clear-debug-data-network'),
-      testRequest: (req) => ipcRenderer.invoke('run-request', req)
+    // grouped, feature-specific APIs
+    contextBridge.exposeInMainWorld('api', {
+      console: consoleApi,
+      network: networkApi,
+      // low-level invoke if you need custom access (still guarded)
+      invoke: safeInvoke
     })
   } catch (error) {
-    console.error(error)
+    // eslint-disable-next-line no-console
+    console.error('preload expose failed', error)
   }
 } else {
-  // @ts-ignore (define in dts)
+  // fallback for non-isolated contexts (rare). Still attach same shape to window.
+  // @ts-ignore
   window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+  // @ts-ignore
+  window.api = {
+    console: consoleApi,
+    network: networkApi,
+    invoke: safeInvoke
+  }
 }

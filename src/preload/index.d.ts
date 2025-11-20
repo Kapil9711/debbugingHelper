@@ -1,24 +1,65 @@
+// src/preload/types.d.ts
 import { ElectronAPI } from '@electron-toolkit/preload'
+
+export type Unsubscribe = () => void
 
 declare global {
   interface Window {
+    /**
+     * Provided by @electron-toolkit/preload
+     * (optional if you don't use the toolkit helpers)
+     */
     electron: ElectronAPI
-    api: unknown
+
+    /**
+     * New grouped API surface exposed by preload
+     * Preferred: window.api.console / window.api.network
+     */
+    api: {
+      console: {
+        getDebugData: () => Promise<any[]>
+        setUseAsConsole: (value: boolean) => Promise<void>
+        setPause: (value: boolean) => Promise<void>
+        setAutoClearLength: (value: number) => Promise<void>
+        clearLogs: () => Promise<void>
+        onUpdated?: (callback: (data: any) => void) => Unsubscribe
+      }
+      network: {
+        getDebugData: () => Promise<any[]>
+        runRequest: (req: any) => Promise<any>
+        setPause: (value: boolean) => Promise<void>
+        setAutoClearLength: (value: number) => Promise<void>
+        clearLogs: () => Promise<void>
+        onUpdated?: (callback: (data: any) => void) => Unsubscribe
+      }
+      /**
+       * Low-level guarded invoke (optional)
+       */
+      invoke: (channel: string, ...args: any[]) => Promise<any>
+    }
+
+    /**
+     * Legacy compatibility: your old names. Prefer `window.api...` going forward.
+     * These can be left as-is so existing renderer code doesn't break immediately.
+     */
     debugApi: {
       getDebugData: () => Promise<any>
-      setAllLogsMode: (value: boolean) => Promise<void> // ← ADD THIS
-      setStopConsole: (value: boolean) => Promise<void> // ← ADD THIS
-      setAutoClearLength: (value: number) => Promise<void> // ← ADD THIS
-      onNewEntry?: (callback: (data: any) => void) => void
+      setAllLogsMode: (value: boolean) => Promise<void>
+      setStopConsole: (value: boolean) => Promise<void>
+      setAutoClearLength: (value: number) => Promise<void>
+      onNewEntry?: (callback: (data: any) => void) => Unsubscribe
       clearLogs: () => Promise<any>
     }
+
     debugApiNetwork: {
       getDebugData: () => Promise<any>
-      setStopNetwork: (value: boolean) => Promise<void> // ← ADD THIS
-      setAutoClearLength: (value: number) => Promise<void> // ← ADD THIS
-      onNewEntry?: (callback: (data: any) => void) => void
+      setStopNetwork: (value: boolean) => Promise<void>
+      setAutoClearLength: (value: number) => Promise<void>
+      onNewEntry?: (callback: (data: any) => void) => Unsubscribe
       clearLogsNetwork: () => Promise<any>
-      testRequest: (req: any) => any
+      testRequest: (req: any) => Promise<any>
     }
   }
 }
+
+export {}
