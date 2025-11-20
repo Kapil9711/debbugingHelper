@@ -3,32 +3,50 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import NetworkPageHeader from '@renderer/components/pages/network/networkPageHeader'
 import NetworkPageContent from '@renderer/components/pages/network/networkPageContent'
 import RequestTester from '@renderer/components/pages/network/testRequest'
+import toast from 'react-hot-toast'
 
 const NetworkPageContext = createContext(null as any)
 export const useNetworkPageContext = () => useContext(NetworkPageContext)
 const NetworkPage = ({}) => {
   const [logs, setLogs] = useState([] as any)
   const [autoClearLength, setAutoClearLength] = useState(301)
-  const [stopConsole, setStopConsole] = useState(false)
+  const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
-  const loadData = async () => {
-    const data = await window.api.network.getLogs()
-    setLogs([...data].reverse())
-  }
 
   useEffect(() => {
-    loadData()
-    const interval = setInterval(loadData, 1000)
-    return () => clearInterval(interval)
+    const loadInitial = async () => {
+      const data = await window.api.network.getLogs()
+      setLogs(data.reverse())
+    }
+    loadInitial()
+    const unsubscribe =
+      window.api.network.onUpdated?.(({ type, payload }) => {
+        if (type == 'newLog') {
+          setLogs((prev) => [payload, ...prev])
+        }
+        if (type == 'length') {
+          toast.success('Length Updated Successfully')
+          setAutoClearLength(payload)
+        }
+        if (type == 'pause') {
+          if (payload) {
+            toast.success('Network Paused')
+          } else {
+            toast.success('Network Started')
+          }
+          setPauseNetwork(payload)
+        }
+        if (type == 'clearLog') {
+          toast.success('Log Clear Successfully')
+          setLogs(payload)
+        }
+        if (type == 'autoClear') {
+          // toast.success('Auto Clear Successfully')
+          setLogs(payload)
+        }
+      }) ?? (() => {})
+    return () => unsubscribe()
   }, [])
-
-  // useEffect(() => {
-  //   window.debugApiNetwork.setAutoClearLength(Number(autoClearLength) || 1)
-  // }, [autoClearLength])
-
-  // useEffect(() => {
-  //   window.debugApiNetwork.setStopNetwork(stopConsole)
-  // }, [stopConsole])
 
   const value = useMemo(() => {
     return {
@@ -36,12 +54,12 @@ const NetworkPage = ({}) => {
       logs,
       setAutoClearLength,
       setLogs,
-      stopConsole,
-      setStopConsole,
+      pauseNetwork,
+      setPauseNetwork,
       testData,
       setTestData
     }
-  }, [autoClearLength, logs, stopConsole, testData])
+  }, [autoClearLength, logs, pauseNetwork, testData])
   return (
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">

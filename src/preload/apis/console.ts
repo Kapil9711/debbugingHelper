@@ -15,7 +15,7 @@ export const consoleApi = {
   // optional subscription API if you broadcast events from main
   onUpdated: (cb: (payload: any) => void): Unsubscribe => {
     const listener = (_: IpcRendererEvent, payload: any) => cb(payload)
-    ipcRenderer.on('event:console-updated', listener)
-    return () => ipcRenderer.removeListener('event:console-updated', listener)
+    ipcRenderer.on(Channels.events.ConsoleUpdated, listener)
+    return () => ipcRenderer.removeListener(Channels.events.ConsoleUpdated, listener)
   }
 }

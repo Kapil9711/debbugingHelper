@@ -4,16 +4,8 @@ import { useNetworkPageContext } from '@renderer/screen/networkPage'
 import { useThemeContext } from '@renderer/layout/mainLayout'
 
 const NetworkPageHeader = () => {
-  const {
-    allLogsMode,
-    setAllLogsMode,
-    logs,
-    autoClearLength,
-    setAutoClearLength,
-    setLogs,
-    stopConsole,
-    setStopConsole
-  } = useNetworkPageContext()
+  const { logs, autoClearLength, setAutoClearLength, setLogs, pauseNetwork, setPauseNetwork } =
+    useNetworkPageContext()
   const { theme } = useThemeContext()
 
   return (
@@ -33,11 +25,12 @@ const NetworkPageHeader = () => {
             </div> */}
             <button
               onClick={() => {
-                setStopConsole((prev) => !prev)
+                setPauseNetwork((prev) => !prev)
+                window.api.network.setPause(!pauseNetwork)
               }}
               className=" h-[30px] w-[50px] bg-green-400 rounded-md uppercase text-xs cursor-pointer flex justify-center items-center"
             >
-              {stopConsole ? (
+              {pauseNetwork ? (
                 <FaPlay className="text-gray-900" size={18} />
               ) : (
                 <FaPauseCircle className="text-gray-900" size={22} />
@@ -60,9 +53,11 @@ const NetworkPageHeader = () => {
               if (Number(e.target.value)) {
                 if (Number(e.target.value) >= 1 && e.target.value?.length < 4) {
                   setAutoClearLength(Number(e.target.value))
+                  window.api.network.setAutoClearLength(Number(e.target.value))
                 }
               } else {
                 setAutoClearLength(0)
+                window.api.network.setAutoClearLength(0)
               }
             }}
           />
@@ -75,8 +70,8 @@ const NetworkPageHeader = () => {
           </div>
           <button
             onClick={async () => {
-              await window.debugApiNetwork.clearLogsNetwork()
-              setLogs([]) // Clear UI immediately
+              setLogs([])
+              window.api.network.clearLogs()
             }}
             className="bg-red-600 w-28 p-1.5! rounded-md leading-[1] py-2! uppercase text-xs cursor-pointer text-white"
           >

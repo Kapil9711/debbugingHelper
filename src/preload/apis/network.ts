@@ -14,7 +14,7 @@ export const networkApi = {
 
   onUpdated: (cb: (payload: any) => void): Unsubscribe => {
     const listener = (_: IpcRendererEvent, payload: any) => cb(payload)
-    ipcRenderer.on('event:network-updated', listener)
-    return () => ipcRenderer.removeListener('event:network-updated', listener)
+    ipcRenderer.on(Channels.events.NetworkUpdated, listener)
+    return () => ipcRenderer.removeListener(Channels.events.NetworkUpdated, listener)
   }
 }

@@ -21,7 +21,7 @@ const HomePageHeader = () => {
         <div className=" flex flex-col justify-center gap-2">
           <p className=" capitalize text-[13px] tracking-[.5px]">http://localhost:5600/debugging</p>
           <div className="flex item-center gap-5 ">
-            <div className="flex items-center gap-2.5">
+            {/* <div className="flex items-center gap-2.5">
               <p className="text-[13px] tracking-[.8px] font-medium uppercase">as console</p>
               <input
                 className="h-4 w-4 bg-green-500"
@@ -29,7 +29,7 @@ const HomePageHeader = () => {
                 checked={allLogsMode}
                 onChange={() => setAllLogsMode((prev) => !prev)}
               />
-            </div>
+            </div> */}
             <button
               onClick={() => {
                 setStopConsole((prev) => !prev)
