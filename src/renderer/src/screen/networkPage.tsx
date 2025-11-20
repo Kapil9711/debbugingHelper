@@ -13,7 +13,6 @@ const NetworkPage = ({}) => {
   const [autoClearLength, setAutoClearLength] = useState(301)
   const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
-
   const handleNetworkEvent = useCallback((event: any) => {
     if (!event) return
 
