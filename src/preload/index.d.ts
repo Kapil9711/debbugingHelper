@@ -17,7 +17,7 @@ declare global {
      */
     api: {
       console: {
-        getDebugData: () => Promise<any[]>
+        getLogs: () => Promise<any[]>
         setUseAsConsole: (value: boolean) => Promise<void>
         setPause: (value: boolean) => Promise<void>
         setAutoClearLength: (value: number) => Promise<void>
@@ -25,7 +25,7 @@ declare global {
         onUpdated?: (callback: (data: any) => void) => Unsubscribe
       }
       network: {
-        getDebugData: () => Promise<any[]>
+        getLogs: () => Promise<any[]>
         runRequest: (req: any) => Promise<any>
         setPause: (value: boolean) => Promise<void>
         setAutoClearLength: (value: number) => Promise<void>
@@ -52,7 +52,7 @@ declare global {
     }
 
     debugApiNetwork: {
-      getDebugData: () => Promise<any>
+      getLogs: () => Promise<any>
       setStopNetwork: (value: boolean) => Promise<void>
       setAutoClearLength: (value: number) => Promise<void>
       onNewEntry?: (callback: (data: any) => void) => Unsubscribe

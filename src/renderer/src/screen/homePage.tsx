@@ -11,7 +11,7 @@ const HomePage = ({}) => {
   const [stopConsole, setStopConsole] = useState(false)
 
   const loadData = async () => {
-    const data = await window.debugApi.getDebugData()
+    const data = await window.api.console.getLogs()
     setLogs([...data].reverse())
   }
 
@@ -21,17 +21,17 @@ const HomePage = ({}) => {
     return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    window.debugApi.setAllLogsMode(allLogsMode)
-  }, [allLogsMode])
+  // useEffect(() => {
+  //   window.debugApi.setAllLogsMode(allLogsMode)
+  // }, [allLogsMode])
 
-  useEffect(() => {
-    window.debugApi.setAutoClearLength(Number(autoClearLength) || 1)
-  }, [autoClearLength])
+  // useEffect(() => {
+  //   window.debugApi.setAutoClearLength(Number(autoClearLength) || 1)
+  // }, [autoClearLength])
 
-  useEffect(() => {
-    window.debugApi.setStopConsole(stopConsole)
-  }, [stopConsole])
+  // useEffect(() => {
+  //   window.debugApi.setStopConsole(stopConsole)
+  // }, [stopConsole])
 
   const value = useMemo(() => {
     return {

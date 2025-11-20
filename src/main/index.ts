@@ -1,11 +1,13 @@
 // src/main/index.ts (recommended)
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { startDebugServer } from './server/server'
-import { registerIPCHandlers } from './ipcHandler'
-import { createMainWindow } from './windows/createMainWindow'
 
-function bootApp() {
+import { createMainWindow } from './windows/createMainWindow'
+import { initMongo } from './db/initMongo'
+import { registerAllIpcHandlers } from './ipc'
+import { startServer } from './server'
+
+async function bootApp() {
   // Set app id etc.
   electronApp.setAppUserModelId('com.electron')
 
@@ -14,8 +16,11 @@ function bootApp() {
   })
 
   // start any background servers / register IPC, but DO NOT create BrowserWindow yet
-  startDebugServer()
-  registerIPCHandlers()
+
+  await initMongo()
+
+  startServer()
+  registerAllIpcHandlers()
 
   // create the window only after app is ready
   if (app.isReady()) {

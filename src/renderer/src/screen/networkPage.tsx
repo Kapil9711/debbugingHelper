@@ -12,7 +12,7 @@ const NetworkPage = ({}) => {
   const [stopConsole, setStopConsole] = useState(false)
   const [testData, setTestData] = useState(null as any)
   const loadData = async () => {
-    const data = await window.debugApiNetwork.getDebugData()
+    const data = await window.api.network.getLogs()
     setLogs([...data].reverse())
   }
 
@@ -22,13 +22,13 @@ const NetworkPage = ({}) => {
     return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    window.debugApiNetwork.setAutoClearLength(Number(autoClearLength) || 1)
-  }, [autoClearLength])
+  // useEffect(() => {
+  //   window.debugApiNetwork.setAutoClearLength(Number(autoClearLength) || 1)
+  // }, [autoClearLength])
 
-  useEffect(() => {
-    window.debugApiNetwork.setStopNetwork(stopConsole)
-  }, [stopConsole])
+  // useEffect(() => {
+  //   window.debugApiNetwork.setStopNetwork(stopConsole)
+  // }, [stopConsole])
 
   const value = useMemo(() => {
     return {

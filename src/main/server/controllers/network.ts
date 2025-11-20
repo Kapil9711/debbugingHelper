@@ -5,6 +5,8 @@ export const createNetwork = async (reqData) => {
   const { body, url, method, type } = reqData
   const time = formatTime()
 
+  // console.log('inisideCreateNetwork', reqData)
+
   let parsedBody
   try {
     parsedBody = JSON.parse(body)
@@ -31,26 +33,30 @@ export const createNetwork = async (reqData) => {
     return flag
   }
 
-  if (type == 'xhr-request' && !url?.includes('/event-tracking') && !url?.includes('socket')) {
-    if (!isLogExist()) {
-      let payload: any = {
-        data: { type, url, method, body: parsedBody },
-        type: 'networkRequest',
-        time: `🕒 ${time}`
-      }
-      if (method == 'Get') {
-        payload = {
-          data: { type, url, method },
+  if (!networkStore.pauseNetwork) {
+    if (type == 'xhr-request' && !url?.includes('/event-tracking') && !url?.includes('socket')) {
+      if (!isLogExist()) {
+        let payload: any = {
+          data: { type, url, method, body: parsedBody },
           type: 'networkRequest',
           time: `🕒 ${time}`
         }
+        if (method == 'Get') {
+          payload = {
+            data: { type, url, method },
+            type: 'networkRequest',
+            time: `🕒 ${time}`
+          }
+        }
+
+        networkStore.push(payload)
+        return { isSuccess: true, msg: 'Log Added Successfull' }
       }
 
-      networkStore.push(payload)
-      return { isSuccess: true, msg: 'Log Added Successfull' }
+      return { isSuccess: false, msg: 'Log Already Exists' }
     }
-
-    return { isSuccess: false, msg: 'Log Already Exists' }
+  } else {
+    return { isSuccess: false, msg: 'Networ Is Paused' }
   }
 
   return { isSuccess: false, msg: 'Not Adding This Payload' }

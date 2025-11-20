@@ -5,11 +5,11 @@ import { Channels } from '../../shared/channels'
 type Unsubscribe = () => void
 
 export const networkApi = {
-  getDebugData: () => ipcRenderer.invoke(Channels.network.GetLogs) as Promise<any[]>,
-  setStopNetwork: (value: boolean) => ipcRenderer.invoke(Channels.network.SetPause, value),
+  getLogs: () => ipcRenderer.invoke(Channels.network.GetLogs) as Promise<any[]>,
+  setPause: (value: boolean) => ipcRenderer.invoke(Channels.network.SetPause, value),
   setAutoClearLength: (value: number) =>
     ipcRenderer.invoke(Channels.network.SetAutoClearLength, value),
-  clearLogsNetwork: () => ipcRenderer.invoke(Channels.network.ClearLogs),
+  clearLogs: () => ipcRenderer.invoke(Channels.network.ClearLogs),
   runRequest: (req: any) => ipcRenderer.invoke(Channels.network.RunRequest, req),
 
   onUpdated: (cb: (payload: any) => void): Unsubscribe => {
