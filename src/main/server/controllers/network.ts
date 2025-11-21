@@ -37,7 +37,11 @@ export const createNetwork = async (reqData) => {
   }
 
   if (!networkStore.pauseNetwork) {
-    if (type == 'xhr-request' && !url?.includes('/event-tracking') && !url?.includes('socket')) {
+    if (
+      type?.includes('request') &&
+      !url?.includes('/event-tracking') &&
+      !url?.includes('socket')
+    ) {
       if (!isLogExist()) {
         let payload: any = {
           data: { type, url, method, body: parsedBody },
