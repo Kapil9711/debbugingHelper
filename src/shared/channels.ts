@@ -20,6 +20,8 @@ export const Channels = {
     SetPause: 'network:set-pause',
     SetAutoClearLength: 'network:set-auto-clear-length',
     ClearLogs: 'network:clear-logs',
+    SetSelectedRequest: 'network:set-selected-request',
+    GetSelectedRequest: 'network:get-selected-request',
     RunRequest: 'network:run-request'
   },
   request: {

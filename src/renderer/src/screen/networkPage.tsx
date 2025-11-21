@@ -14,6 +14,7 @@ const NetworkPage = ({}) => {
   const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
   const [filter, setFilter] = useState('')
+  const [requestData, setRequestData] = useState([])
   const handleNetworkEvent = useCallback((event: any) => {
     if (!event) return
 
@@ -53,6 +54,10 @@ const NetworkPage = ({}) => {
       const pause = await window.api.network.getPause()
       const autoLength = await window.api.network.getAutoLength()
       const searchString = await window.api.network.getSearchString()
+      const selectedRequest = await window.api.network.getSelecetedRequest()
+      const requestArr = await window.api.request.getRequest('')
+      setRequestData(requestArr)
+      setTestData(selectedRequest)
       setFilter(searchString)
       setLogs(data.reverse())
       setAutoClearLength(autoLength)
@@ -77,14 +82,15 @@ const NetworkPage = ({}) => {
       testData,
       setTestData,
       filter,
-      setFilter
+      setFilter,
+      requestData
     }
-  }, [autoClearLength, logs, pauseNetwork, testData, filter])
+  }, [autoClearLength, logs, pauseNetwork, testData, filter, requestData])
   return (
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">
         {testData ? (
-          <RequestTester request={testData} />
+          <RequestTester request={testData} requestData={requestData} />
         ) : (
           <>
             <NetworkPageHeader />

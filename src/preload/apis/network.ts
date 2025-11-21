@@ -10,6 +10,9 @@ export const networkApi = {
   getAutoLength: () => ipcRenderer.invoke(Channels.network.GetAutoLength) as Promise<any[]>,
   setPause: (value: boolean) => ipcRenderer.invoke(Channels.network.SetPause, value),
   setSearchString: (value: string) => ipcRenderer.invoke(Channels.network.SetSearchString, value),
+  setSelecetedRequest: (value: any) =>
+    ipcRenderer.invoke(Channels.network.SetSelectedRequest, value),
+  getSelecetedRequest: () => ipcRenderer.invoke(Channels.network.GetSelectedRequest),
   getSearchString: () => ipcRenderer.invoke(Channels.network.GetSearchString),
   setAutoClearLength: (value: number) =>
     ipcRenderer.invoke(Channels.network.SetAutoClearLength, value),

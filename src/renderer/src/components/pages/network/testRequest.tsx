@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNetworkPageContext } from '@renderer/screen/networkPage'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
@@ -11,14 +11,12 @@ type Req = {
   headers?: Record<string, string>
 }
 
-export default function RequestTester({ request }: { request: Req }) {
+export default function RequestTester({ request, requestData }: any) {
   const [response, setResponse] = useState<any | null>(null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'body' | 'headers' | 'timeline'>('body')
   const { setTestData } = useNetworkPageContext()
-
   const method = (request?.method || 'GET').toUpperCase()
-
   function prettyJSON(obj: any) {
     try {
       return JSON.stringify(obj, null, 2)
@@ -101,6 +99,8 @@ export default function RequestTester({ request }: { request: Req }) {
       </div>
     )
   }
+
+  console.log(requestData, 'requestData')
 
   return (
     <>
@@ -189,7 +189,10 @@ export default function RequestTester({ request }: { request: Req }) {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setTestData(null)}
+              onClick={() => {
+                setTestData(null)
+                window.api.network.setSelecetedRequest(null)
+              }}
               className="text-sm px-3! py-1! rounded border border-[#24303a] hover:bg-[#0b1220]"
             >
               Back

@@ -40,6 +40,8 @@ declare global {
         setAutoClearLength: (value: number) => Promise<void>
         clearLogs: () => Promise<void>
         onUpdated?: (callback: (data: any) => void) => Unsubscribe
+        setSelecetedRequest: (value: any) => Promise<any>
+        getSelecetedRequest: () => Promise<any>
       }
       request: {
         getRequest: (query: string) => Promise<any>

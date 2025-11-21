@@ -148,7 +148,8 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) =>
                 style={{ display: isHovered == index ? 'block' : 'none' }}
                 onClick={() => {
                   setTestData(item?.data)
-                  console.log(item?.data)
+                  window.api.network.setSelecetedRequest(item?.data)
+                  window.api.request.setRequest(item?.data)
                   // const obj = JSON.stringify(item?.data, null, 2)
                   // handleCopy(obj)
                 }}

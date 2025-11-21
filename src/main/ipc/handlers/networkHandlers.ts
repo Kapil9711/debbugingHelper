@@ -19,6 +19,14 @@ export function registerNetworkHandlers() {
     })
   })
 
+  ipcMain.handle(Channels.network.SetSelectedRequest, (_: any, value) => {
+    networkStore.selectedRequest = value
+  })
+
+  ipcMain.handle(Channels.network.GetSelectedRequest, (_: any) => {
+    return networkStore.selectedRequest
+  })
+
   ipcMain.handle(Channels.network.SetPause, (_e, value: boolean) => {
     networkStore.pauseNetwork = value
     broadcast(Channels.events.NetworkUpdated, { type: NetworkEventType.Pause, payload: value })

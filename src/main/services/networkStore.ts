@@ -12,6 +12,7 @@ export const networkStore = {
   autoClearLength: 301,
   pauseNetwork: false,
   searchString: '',
+  selectedRequest: null,
 
   push(entry: any) {
     this.logs.push(entry)
