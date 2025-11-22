@@ -4,6 +4,8 @@ import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 import Header from '@renderer/components/header'
 import { convertId } from '@renderer/utlis/dbHelper'
+import { a } from 'node_modules/tailwindcss/dist/types-WlZgYgM8.mjs'
+import { IoMdClose } from 'react-icons/io'
 
 type Req = {
   url: string
@@ -12,8 +14,10 @@ type Req = {
   headers?: Record<string, string>
 }
 
-export default function RequestTester({ request, requestData }: any) {
+export default function RequestTester({ requestData }: any) {
+  const [request, setRequest] = useState(requestData[0])
   const [response, setResponse] = useState<any | null>(request?.response || null)
+
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'body' | 'headers' | 'timeline'>('body')
   const { setTestData } = useNetworkPageContext()
@@ -101,7 +105,7 @@ export default function RequestTester({ request, requestData }: any) {
           </span>
           <span className="text-sm opacity-80">{response.statusText}</span>
         </div>
-        <div className="text-sm text-gray-300">• {response.durationMs ?? 0} ms</div>
+        <div className="text-sm text-gray-300">• {String(response.durationMs / 1000)} s</div>
         <div className="text-sm text-gray-300">
           • {response.bodySize ? `${response.bodySize} bytes` : '—'}
         </div>
@@ -109,17 +113,23 @@ export default function RequestTester({ request, requestData }: any) {
     )
   }
 
+  useEffect(() => {
+    if (request?.response === undefined || request?.response === null) {
+      runTest()
+    }
+    setResponse(request?.response)
+  }, [request])
+
+  useEffect(() => {
+    setRequest(requestData[0])
+  }, [requestData])
+
   console.log(request, 'requestData')
 
   return (
     <>
       <Header>
-        <div className="border-b border-gray-400 h-full w-full flex items-center px-6! gap-4 overflow-auto scrollbar-hidden">
-          <div className="w-[140px] cursor-pointer select-none hover:bg-[var(--rev-bg-header)] hover:text-[var(--rev-text)] h-[45px] border p-1! px-2! rounded-md text-[var(--text)]">
-            <p className="text-sm leading-[1.2]">Post</p>
-            <p className="text-xs">customer_review</p>
-          </div>
-        </div>
+        <RequestHeader requestData={requestData} request={request} setRequest={setRequest} />
       </Header>
 
       <div className="min-h-screen bg-[#0f1724] text-white p-6! flex flex-col gap-6!">
@@ -440,5 +450,59 @@ export default function RequestTester({ request, requestData }: any) {
         </div>
       </div>
     </>
+  )
+}
+
+const RequestHeader = ({ requestData, request, setRequest }: any) => {
+  const [hoveredId, setHoveredId] = useState('')
+  return (
+    <div className="border-b border-gray-400 h-full w-full flex items-center px-6! gap-4 overflow-auto scrollbar-hidden">
+      <p>{requestData?.length}</p>
+      {requestData?.map((item: any) => {
+        const itemId = convertId(item?._id)
+        const dataId = convertId(request?._id)
+        const isSelectedItem = itemId === dataId
+        const isHoveredItem = hoveredId == convertId(item?._id)
+        const url = item?.url
+        let path = item?.url
+
+        if (url) {
+          path = new URL(url)?.pathname
+        }
+
+        return (
+          <div
+            key={itemId}
+            onClick={() => {
+              setRequest(item)
+            }}
+            onMouseEnter={() => {
+              const id = convertId(item?._id)
+              setHoveredId(id)
+            }}
+            onMouseLeave={() => {
+              setHoveredId('')
+            }}
+            className={`w-[140px] relative cursor-pointer select-none hover:bg-[var(--rev-bg-header)] hover:text-[var(--rev-text)] h-[45px] border p-1! px-2! rounded-md  ${isSelectedItem ? 'bg-[var(--rev-bg-header)]  text-[var(--rev-text)]' : 'text-[var(--text)]'}`}
+          >
+            <p className="text-sm leading-[1.2]">{item?.method}</p>
+            <p className="text-xs truncate">{path}</p>
+
+            {(isHoveredItem || isSelectedItem) && (
+              <>
+                <p
+                  onClick={async () => {
+                    await window.api.request.deleteRequest(itemId)
+                  }}
+                  className="absolute right-2 top-[3px] "
+                >
+                  <IoMdClose />
+                </p>
+              </>
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }

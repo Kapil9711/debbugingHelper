@@ -24,18 +24,33 @@ export function registorRequestHandler() {
       header: request?.header || {},
       createdAt: Date.now()
     }
-    await RequestModel.insertOne(payload)
-    broadcast(Channels.events.RequestUpdated, { type: RequestEventType.NewRequest, payload })
+    const isExist = await RequestModel.findOne({ url: payload?.url, method: payload?.method })
+    if (isExist) {
+      await RequestModel.findOneAndUpdate(
+        { url: payload?.url, method: payload?.method },
+        { $set: { body: payload?.body, response: null, createdAt: Date.now() } }
+      )
+    } else {
+      await RequestModel.insertOne(payload)
+    }
+
+    const allDocs = await RequestModel.find({})?.sort({ createdAt: -1 }).toArray()
+
+    broadcast(Channels.events.RequestUpdated, {
+      type: RequestEventType.UpdateRequest,
+      payload: allDocs
+    })
+
     return []
   })
-  ipcMain.handle(Channels.request.DeleteRequest, async (_: any, data) => {
-    const { id } = data
+  ipcMain.handle(Channels.request.DeleteRequest, async (_: any, query: string) => {
+    const id = query
     const db = getDb()
     const RequestModel = db.collection('requests')
     const objectId = new ObjectId(id)
-
     await RequestModel.findOneAndDelete({ _id: objectId })
     const allDocs = await RequestModel.find({}).sort({ createdAt: -1 }).toArray()
+
     broadcast(Channels.events.RequestUpdated, {
       type: RequestEventType.UpdateRequest,
       payload: allDocs

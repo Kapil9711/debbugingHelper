@@ -52,10 +52,13 @@ const NetworkPage = ({}) => {
     if (!event) return
     switch (event.type) {
       case RequestEventType.NewRequest:
+        console.log(event?.payload, 'payload')
         setRequestData((prev: any) => [event.payload, ...prev])
+        setTestData(event?.payload)
         break
       case RequestEventType.UpdateRequest:
         setRequestData(event.payload)
+        setTestData(event?.payload[0])
         break
       default:
         console.warn('Unknown network event type', event)
@@ -71,7 +74,6 @@ const NetworkPage = ({}) => {
       const selectedRequest = await window.api.network.getSelecetedRequest()
       const requestArr = await window.api.request.getRequest('')
       setRequestData(requestArr)
-
       setTestData(selectedRequest)
       setFilter(searchString)
       setLogs(data.reverse())
@@ -113,7 +115,7 @@ const NetworkPage = ({}) => {
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">
         {testData ? (
-          <RequestTester request={requestData[0]} requestData={requestData} />
+          <RequestTester requestData={requestData} />
         ) : (
           <>
             <NetworkPageHeader />
