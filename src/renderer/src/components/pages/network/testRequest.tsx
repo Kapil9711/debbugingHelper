@@ -3,6 +3,7 @@ import { useNetworkPageContext } from '@renderer/screen/networkPage'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 import Header from '@renderer/components/header'
+import { convertId } from '@renderer/utlis/dbHelper'
 
 type Req = {
   url: string
@@ -12,7 +13,7 @@ type Req = {
 }
 
 export default function RequestTester({ request, requestData }: any) {
-  const [response, setResponse] = useState<any | null>(null)
+  const [response, setResponse] = useState<any | null>(request?.response || null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'body' | 'headers' | 'timeline'>('body')
   const { setTestData } = useNetworkPageContext()
@@ -57,13 +58,21 @@ export default function RequestTester({ request, requestData }: any) {
       const safeRequest = {
         url: request?.url,
         method: request?.method,
-        body: request?.body,
+        body: request?.method == 'Get' ? undefined : request?.body,
         headers: request?.headers ?? {}
       }
 
       const res = await window.api.network.runRequest(safeRequest)
       // expected shape: { ok, status, statusText, url, headers, body, bodyIsBase64, durationMs, bodySize, error }
       setResponse(res)
+
+      const idString = convertId(request?._id)
+      const payload = {
+        ...request,
+        response: res
+      }
+      window.api.request.updateRequest({ id: idString, payload })
+
       setActiveTab('body')
     } catch (err: any) {
       toast.error(String(err?.message ?? err))
@@ -77,7 +86,7 @@ export default function RequestTester({ request, requestData }: any) {
     if (!response.ok) {
       return (
         <div className="inline-flex items-center gap-2 text-red-400">
-          <span className="px-2 py-1 rounded bg-red-900/40 text-sm font-semibold">
+          <span className="px-2! py-1! rounded bg-red-900/40 text-sm font-semibold">
             {response.status ?? 'ERR'}
           </span>
           <span className="text-sm opacity-80">{response.statusText ?? 'Request failed'}</span>
@@ -87,7 +96,7 @@ export default function RequestTester({ request, requestData }: any) {
     return (
       <div className="inline-flex items-center gap-3">
         <div className="inline-flex items-center gap-2">
-          <span className="px-2 py-1 rounded bg-green-800/60 text-green-200 font-semibold text-sm">
+          <span className="px-2! py-1! rounded bg-green-800/60 text-green-200 font-semibold text-sm">
             {response.status}
           </span>
           <span className="text-sm opacity-80">{response.statusText}</span>
@@ -100,7 +109,7 @@ export default function RequestTester({ request, requestData }: any) {
     )
   }
 
-  console.log(requestData, 'requestData')
+  console.log(request, 'requestData')
 
   return (
     <>

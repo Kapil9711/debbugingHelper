@@ -8,7 +8,7 @@ export const requestApi = {
   setRequest: (request: any) => ipcRenderer.invoke(Channels.request.SetRequest, request),
 
   deleteRequest: (query: string) => ipcRenderer.invoke(Channels.request.DeleteRequest, query),
-  updateRequest: (query: string) => ipcRenderer.invoke(Channels.request.UpdateRequest, query),
+  updateRequest: (data: any) => ipcRenderer.invoke(Channels.request.UpdateRequest, data),
 
   onUpdated: (cb: (payload: any) => void): Unsubscribe => {
     const listener = (_: IpcRendererEvent, payload: any) => cb(payload)

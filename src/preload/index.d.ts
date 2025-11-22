@@ -47,7 +47,8 @@ declare global {
         getRequest: (query: string) => Promise<any>
         setRequest: (request: any) => Promise<any>
         deleteRequest: (query: string) => Promise<any>
-        updateRequest: (query: string) => Promise<any>
+        updateRequest: (query: any) => Promise<any>
+        onUpdated?: (callback: (data: any) => void) => Unsubscribe
       }
       /**
        * Low-level guarded invoke (optional)

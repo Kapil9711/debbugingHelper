@@ -15,3 +15,8 @@ export const ConsoleEventType = {
   AutoClear: 'autoClear',
   searchString: 'searchString'
 }
+
+export const RequestEventType = {
+  NewRequest: 'newRequest',
+  UpdateRequest: 'updateRequest'
+}

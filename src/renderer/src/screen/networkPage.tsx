@@ -4,7 +4,7 @@ import NetworkPageHeader from '@renderer/components/pages/network/networkPageHea
 import NetworkPageContent from '@renderer/components/pages/network/networkPageContent'
 import RequestTester from '@renderer/components/pages/network/testRequest'
 import toast from 'react-hot-toast'
-import { NetworkEventType } from '../../../shared/eventType'
+import { NetworkEventType, RequestEventType } from '../../../shared/eventType'
 
 const NetworkPageContext = createContext(null as any)
 export const useNetworkPageContext = () => useContext(NetworkPageContext)
@@ -14,7 +14,7 @@ const NetworkPage = ({}) => {
   const [pauseNetwork, setPauseNetwork] = useState(false)
   const [testData, setTestData] = useState(null as any)
   const [filter, setFilter] = useState('')
-  const [requestData, setRequestData] = useState([])
+  const [requestData, setRequestData] = useState([] as any)
   const handleNetworkEvent = useCallback((event: any) => {
     if (!event) return
 
@@ -48,6 +48,20 @@ const NetworkPage = ({}) => {
     }
   }, [])
 
+  const handleRequestEvent = useCallback((event: any) => {
+    if (!event) return
+    switch (event.type) {
+      case RequestEventType.NewRequest:
+        setRequestData((prev: any) => [event.payload, ...prev])
+        break
+      case RequestEventType.UpdateRequest:
+        setRequestData(event.payload)
+        break
+      default:
+        console.warn('Unknown network event type', event)
+    }
+  }, [])
+
   useEffect(() => {
     const loadInitial = async () => {
       const data = await window.api.network.getLogs()
@@ -57,6 +71,7 @@ const NetworkPage = ({}) => {
       const selectedRequest = await window.api.network.getSelecetedRequest()
       const requestArr = await window.api.request.getRequest('')
       setRequestData(requestArr)
+
       setTestData(selectedRequest)
       setFilter(searchString)
       setLogs(data.reverse())
@@ -68,7 +83,15 @@ const NetworkPage = ({}) => {
       window.api.network.onUpdated?.((payload) => {
         handleNetworkEvent(payload)
       }) ?? (() => {})
-    return () => unsubscribe()
+
+    const unsubscribeRequest =
+      window.api.request.onUpdated?.((payload) => {
+        handleRequestEvent(payload)
+      }) ?? (() => {})
+    return () => {
+      unsubscribe()
+      unsubscribeRequest()
+    }
   }, [])
 
   const value = useMemo(() => {
@@ -90,7 +113,7 @@ const NetworkPage = ({}) => {
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">
         {testData ? (
-          <RequestTester request={testData} requestData={requestData} />
+          <RequestTester request={requestData[0]} requestData={requestData} />
         ) : (
           <>
             <NetworkPageHeader />

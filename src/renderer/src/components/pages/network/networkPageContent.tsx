@@ -146,10 +146,11 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) =>
               </button>
               <button
                 style={{ display: isHovered == index ? 'block' : 'none' }}
-                onClick={() => {
+                onClick={async () => {
                   setTestData(item?.data)
                   window.api.network.setSelecetedRequest(item?.data)
-                  window.api.request.setRequest(item?.data)
+                  await window.api.request.setRequest(item?.data)
+
                   // const obj = JSON.stringify(item?.data, null, 2)
                   // handleCopy(obj)
                 }}

@@ -3,7 +3,7 @@ import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 
 import { createMainWindow } from './windows/createMainWindow'
-import { initMongo } from './db/initMongo'
+import { closeMongo, initMongo } from './db/initMongo'
 import { registerAllIpcHandlers } from './ipc'
 import { startServer } from './server'
 
@@ -33,6 +33,9 @@ async function bootApp() {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+  })
+  app.on('before-quit', async () => {
+    await closeMongo()
   })
 }
 
