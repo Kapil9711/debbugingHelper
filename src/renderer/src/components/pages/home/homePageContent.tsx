@@ -132,7 +132,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
           >
             <div className="flex items-center gap-5">
               <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
-                {item?.time}
+                {index + 1} - {item?.time}
               </p>
               <button
                 style={{ display: isHovered == index ? 'block' : 'none' }}
