@@ -131,7 +131,10 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
             className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative max-w-[80%] ${isHovered == index ? 'border border-gray-200' : ''} `}
           >
             <div className="flex items-center gap-5">
-              <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
+              <p
+                className={`${item?.type?.includes('log') ? 'text-green-500' : item?.type?.includes('warn') ? 'text-yellow-500' : item?.type?.includes('error') ? 'text-red-500' : 'text-violet-500'}  font-semibold!  border-b  border-white w-fit`}
+                key={index}
+              >
                 {index + 1} - {item?.time}
               </p>
               <button

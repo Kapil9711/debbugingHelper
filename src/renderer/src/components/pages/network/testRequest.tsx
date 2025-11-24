@@ -467,7 +467,9 @@ const RequestHeader = ({ requestData, request, setRequest }: any) => {
         let path = item?.url
 
         if (url) {
-          path = new URL(url)?.pathname
+          try {
+            path = new URL(url, 'http://dummy.com').pathname
+          } catch (error) {}
         }
 
         return (

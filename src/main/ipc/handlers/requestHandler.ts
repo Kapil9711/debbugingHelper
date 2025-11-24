@@ -21,14 +21,21 @@ export function registorRequestHandler() {
       url: request?.url || '',
       body: request?.body || '',
       method: request?.method || '',
-      header: request?.header || {},
+      headers: request?.headers || {},
       createdAt: Date.now()
     }
     const isExist = await RequestModel.findOne({ url: payload?.url, method: payload?.method })
     if (isExist) {
       await RequestModel.findOneAndUpdate(
         { url: payload?.url, method: payload?.method },
-        { $set: { body: payload?.body, response: null, createdAt: Date.now() } }
+        {
+          $set: {
+            body: payload?.body,
+            headers: payload?.headers,
+            response: null,
+            createdAt: Date.now()
+          }
+        }
       )
     } else {
       await RequestModel.insertOne(payload)

@@ -5,10 +5,11 @@ import { networkStore } from '../../services/networkStore'
 import { formatTime } from '../utlis/time'
 
 export const createNetwork = async (reqData) => {
-  const { body, url, method, type } = reqData
+  const { body, url, method, headers, responseHeaders, responseBody, pageUrl, status, type } =
+    reqData
   const time = formatTime()
 
-  // console.log('inisideCreateNetwork', reqData)
+  console.log('inisideCreateNetwork', reqData)
 
   let parsedBody
   try {
@@ -21,12 +22,13 @@ export const createNetwork = async (reqData) => {
     let flag = false
     for (let item of networkStore.logs) {
       const obj1 = JSON.stringify(item?.data, null, 2)
+
       let obj2
       if (method == 'Get') {
-        obj2 = JSON.stringify({ type, url, method }, null, 2)
+        obj2 = JSON.stringify({ type, url, headers, method, pageUrl }, null, 2)
       }
       if (method != 'Get') {
-        obj2 = JSON.stringify({ type, url, method, body: parsedBody }, null, 2)
+        obj2 = JSON.stringify({ type, url, headers, method, body: parsedBody, pageUrl }, null, 2)
       }
       if (obj1 == obj2) {
         flag = true
@@ -40,17 +42,19 @@ export const createNetwork = async (reqData) => {
     if (
       type?.includes('request') &&
       !url?.includes('/event-tracking') &&
-      !url?.includes('socket')
+      !url?.includes('socket') &&
+      url != '/'
     ) {
       if (!isLogExist()) {
         let payload: any = {
-          data: { type, url, method, body: parsedBody },
+          data: { type, url, headers, method, body: parsedBody, pageUrl },
           type: 'networkRequest',
           time: `🕒 ${time}`
         }
+
         if (method == 'Get') {
           payload = {
-            data: { type, url, method },
+            data: { type, url, headers, method, pageUrl },
             type: 'networkRequest',
             time: `🕒 ${time}`
           }

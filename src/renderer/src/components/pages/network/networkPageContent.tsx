@@ -24,11 +24,13 @@ const NetworkPageContent = () => {
       const obj = JSON.stringify(item, null, 2)
       return pattern.test(obj)
     })
-    if (RemoveDublicateRef.current) {
-      handleRemoveDuplicate(true, obj)
-    } else {
-      setFilterLogs(obj)
-    }
+    setFilterLogs(obj)
+
+    // if (RemoveDublicateRef.current) {
+    //   handleRemoveDuplicate(true, obj)
+    // } else {
+    //   setFilterLogs(obj)
+    // }
   }
 
   const handleRemoveDuplicate = (flag, logs: any) => {
@@ -128,7 +130,8 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) =>
             onMouseEnter={() => setIsHovered(index)}
             onMouseLeave={() => setIsHovered('')}
             key={index}
-            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative max-w-[80%] ${isHovered == index ? 'border border-gray-200' : ''} `}
+            style={{ wordWrap: 'break-word' }}
+            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative max-w-[80%] break-all ${isHovered == index ? 'border border-gray-200' : ''} `}
           >
             <div className="flex items-center gap-5">
               <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
