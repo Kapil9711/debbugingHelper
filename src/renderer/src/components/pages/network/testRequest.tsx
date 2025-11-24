@@ -62,7 +62,7 @@ export default function RequestTester({ requestData }: any) {
       const safeRequest = {
         url: request?.url,
         method: request?.method,
-        body: request?.method == 'Get' ? undefined : request?.body,
+        body: String(request?.method).toLowerCase() == 'get' ? undefined : request?.body,
         headers: request?.headers ?? {}
       }
 
