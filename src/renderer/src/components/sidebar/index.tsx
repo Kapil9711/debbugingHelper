@@ -4,11 +4,10 @@ import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
 import { TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
-
 import { IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
-
 import { GiNetworkBars } from 'react-icons/gi'
+import { GrTest } from 'react-icons/gr'
 
 const SideBar = () => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
@@ -66,7 +65,8 @@ const SideBar = () => {
 
 const sidebarData = [
   { title: 'Console', icon: <VscDebugConsole />, url: '/' },
-  { title: 'Network', icon: <GiNetworkBars />, url: '/network' }
+  { title: 'Network', icon: <GiNetworkBars />, url: '/network' },
+  { title: 'Api Testing', icon: <GrTest />, url: '/api-testing' }
 ]
 
 const SidebarContent = () => {

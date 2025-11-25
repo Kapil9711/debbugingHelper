@@ -6,6 +6,7 @@ import HomePage from './screen/homePage'
 import Settings from './screen/settings'
 import { Toaster } from 'react-hot-toast'
 import NetworkPage from './screen/networkPage'
+import ApiTesting from './screen/apiTesting'
 
 function App(): React.JSX.Element {
   return (
@@ -42,6 +43,7 @@ function App(): React.JSX.Element {
         <Route element={<MainLayout />}>
           <Route index element={<HomePage />} />
           <Route path="network" element={<NetworkPage />} />
+          <Route path="api-testing" element={<ApiTesting />} />
           <Route path="settings" element={<Settings />} />
 
           {/* 404 fallback */}
