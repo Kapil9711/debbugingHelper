@@ -408,11 +408,7 @@ export default function RequestTester({ requestData }: any) {
                           </div>
                         </div>
                       </div>
-                    ) : typeof response.body === 'string' ? (
-                      <pre className="bg-[#001219] p-4! rounded text-sm text-yellow-200 whitespace-pre-wrap overflow-auto">
-                        {response.body}
-                      </pre>
-                    ) : (
+                    ) : isSafeToParse(response.body) ? (
                       <div className="bg-[#001219] p-4! rounded text-sm text-yellow-200 overflow-auto max-h-[550px]">
                         <ReactJson
                           style={{
@@ -421,7 +417,7 @@ export default function RequestTester({ requestData }: any) {
                             background: 'transparent',
                             height: 'fit-content'
                           }}
-                          src={response.body}
+                          src={safeParseJSON(response.body)}
                           theme="summerfruit"
                           name={'Response'}
                           collapsed={1}
@@ -429,6 +425,10 @@ export default function RequestTester({ requestData }: any) {
                           displayDataTypes={true}
                         />
                         {/* {prettyJSON(response.body)} */}
+                      </div>
+                    ) : (
+                      <div className="bg-[#001219] p-4! rounded text-sm text-yellow-200 overflow-auto max-h-[550px]">
+                        <pre className="text-red-400">{response.body}</pre>
                       </div>
                     )}
                   </div>
@@ -923,4 +923,25 @@ function RequestEditor({
       </div>
     </div>
   )
+}
+
+function safeParseJSON(str) {
+  if (typeof str !== 'string') return str
+
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    return str
+  }
+}
+
+function isSafeToParse(str) {
+  if (typeof str !== 'string') return true
+
+  try {
+    JSON.parse(str)
+    return true
+  } catch (e) {
+    return false
+  }
 }

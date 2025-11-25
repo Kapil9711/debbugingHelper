@@ -56,6 +56,7 @@ const NetworkPageContent = () => {
   useEffect(() => {
     handleFilter(filterRef?.current)
   }, [logs])
+
   return (
     <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative">
       <HomePageFilters
@@ -72,7 +73,6 @@ const NetworkPageContent = () => {
         setIsHovered={setIsHovered}
         isHovered={isHovered}
         handleCopy={handleCopy}
-        setTestData={setTestData}
       />
     </div>
   )
@@ -121,13 +121,17 @@ const HomePageFilters = ({ handleFilter, count, filter, setFilter, filterRef }: 
   )
 }
 
-const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) => {
+const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
   return (
     <>
       {logs.map((item: any, index: any) => {
         return (
           <div
-            onMouseEnter={() => setIsHovered(index)}
+            id={item?.url}
+            onMouseEnter={() => {
+              setIsHovered(index)
+              // localStorage.setItem('lastItemId', item?.url)
+            }}
             onMouseLeave={() => setIsHovered('')}
             key={index}
             style={{ wordWrap: 'break-word' }}
@@ -182,6 +186,21 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, setTestData }) =>
       })}
     </>
   )
+}
+
+export function scrollToElementWithOffset(id, offset = 0) {
+  const el = document.getElementById(id)
+  if (!el) return
+
+  const rect = el.getBoundingClientRect()
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+  const elementTop = rect.top + scrollTop
+
+  window.scrollTo({
+    top: elementTop - offset,
+    behavior: 'smooth'
+  })
 }
 
 export default NetworkPageContent
