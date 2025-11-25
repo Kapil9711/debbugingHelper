@@ -5,11 +5,8 @@ import { networkStore } from '../../services/networkStore'
 import { formatTime } from '../utlis/time'
 
 export const createNetwork = async (reqData) => {
-  const { body, url, method, headers, responseHeaders, responseBody, pageUrl, status, type } =
-    reqData
+  const { body, url, method, headers, pageUrl, type } = reqData
   const time = formatTime()
-
-  console.log('inisideCreateNetwork', reqData)
 
   let parsedBody
   try {

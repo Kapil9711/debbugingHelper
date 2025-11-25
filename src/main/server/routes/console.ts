@@ -6,7 +6,6 @@ export const consoleRouter = Router()
 consoleRouter.post('/', async (req, res, next) => {
   try {
     const { payload } = req.body
-    console.log('insideReqData1', req.body)
 
     if (!payload) return res.status(400).json({ isSucess: false, msg: 'Payload is required' })
     const result = await createConsole(req.body)

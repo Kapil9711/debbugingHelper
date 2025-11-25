@@ -7,7 +7,7 @@ import isEqual from 'lodash/isEqual'
 
 export const createConsole = async (reqData) => {
   const { type, payload } = reqData
-  console.log('insideReqDatafinal', reqData)
+
   const time = formatTime()
   const isLogExist = () => {
     return consoleStore.logs.some((item: any) => {
