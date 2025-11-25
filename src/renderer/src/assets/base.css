@@ -46,3 +46,11 @@ body {
   color: var(--text);
   overflow: hidden;
 }
+
+.ͼ4y .cm-gutters {
+  background-color: transparent !important;
+}
+
+.ͼ4y {
+  background-color: transparent !important;
+}

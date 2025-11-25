@@ -1,29 +1,21 @@
 import Header from '@renderer/components/header'
+import { useApiTestingContext } from '@renderer/screen/apiTesting'
 import { FaEdit } from 'react-icons/fa'
 
 const ApiTestingHeader = () => {
-  const inputMethod = 'GET'
+  const { selectedEnvironment, setSelectedEnvironment } = useApiTestingContext()
   return (
     <Header>
       <div className="h-full w-full border-b border-gray-400">
-        <div className="h-[50%] border-b border-gray-400 w-full flex justify-between items-center px-5!">
+        <div className="h-[50%]  w-full flex justify-between items-center px-5!">
           <p>Global Environment</p>
-          <div>
+          <div className="flex items-center justify-center gap-5">
             <select
-              // value={inputMethod}
-              // onChange={(e) => {
-              //   setInputMethod(e.target.value)
-              //   const idString = convertId(request?._id)
-              //   const payload = {
-              //     ...request,
-              //     method: e.target.value
-              //   }
-              //   window.api.request.updateRequest({ id: idString, payload })
-              // }}
-              className={`
-    px-3! py-1! rounded font-semibold text-sm shadow-sm cursor-pointer outline-none
-  
-  `}
+              value={selectedEnvironment}
+              onChange={(e) => {
+                setSelectedEnvironment(e.target.value)
+              }}
+              className={`px-3! py-1! rounded font-semibold text-sm shadow-sm cursor-pointer border outline-none `}
             >
               <option value="GET">GET</option>
               <option value="POST">POST</option>
@@ -32,7 +24,7 @@ const ApiTestingHeader = () => {
               <option value="PATCH">PATCH</option>
             </select>
 
-            <button className="py-1! px-3! rounded-lg border border-gray-400 text-sm">
+            <button className="py-1! px-1! rounded-lg cursor-pointer  text-sm">
               <FaEdit size={15} />
             </button>
           </div>
