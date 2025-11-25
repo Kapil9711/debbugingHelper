@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useNetworkPageContext } from '@renderer/screen/networkPage'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
@@ -60,19 +60,20 @@ export default function RequestTester({ requestData }: any) {
       setResponse(null)
 
       const safeRequest = {
-        url: request?.url,
-        method: request?.method,
+        url: inputValue,
+        method: inputMethod,
         body: String(request?.method).toLowerCase() == 'get' ? undefined : request?.body,
         headers: request?.headers ?? {}
       }
 
       const res = await window.api.network.runRequest(safeRequest)
-      // expected shape: { ok, status, statusText, url, headers, body, bodyIsBase64, durationMs, bodySize, error }
       setResponse(res)
 
       const idString = convertId(request?._id)
       const payload = {
         ...request,
+        url: inputValue,
+        method: inputMethod,
         response: res
       }
       window.api.request.updateRequest({ id: idString, payload })
@@ -117,6 +118,8 @@ export default function RequestTester({ requestData }: any) {
     if (request?.response === undefined || request?.response === null) {
       runTest()
     }
+    setInputMethod(String(request?.method)?.toUpperCase())
+    setInputValue(request?.url)
     setResponse(request?.response)
   }, [request])
 
@@ -125,6 +128,9 @@ export default function RequestTester({ requestData }: any) {
   }, [requestData])
 
   console.log(request, 'requestData')
+
+  const [inputValue, setInputValue] = useState(request?.url)
+  const [inputMethod, setInputMethod] = useState(String(request?.method)?.toUpperCase())
 
   return (
     <>
@@ -137,27 +143,53 @@ export default function RequestTester({ requestData }: any) {
         <div className="flex items-start justify-between gap-4!">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div
-                className={`px-3! py-1! rounded font-semibold text-sm shadow-sm ${
-                  method === 'GET'
-                    ? 'bg-green-600 text-white'
-                    : method === 'POST'
-                      ? 'bg-orange-500 text-white'
-                      : method === 'PUT'
-                        ? 'bg-blue-600 text-white'
-                        : method === 'DELETE'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-gray-700 text-white'
-                }`}
+              <select
+                value={inputMethod}
+                onChange={(e) => {
+                  setInputMethod(e.target.value)
+                  const idString = convertId(request?._id)
+                  const payload = {
+                    ...request,
+                    method: e.target.value
+                  }
+                  window.api.request.updateRequest({ id: idString, payload })
+                }}
+                className={`
+    px-3! py-1! rounded font-semibold text-sm shadow-sm cursor-pointer outline-none
+    ${
+      inputMethod === 'GET'
+        ? 'bg-green-600 text-white'
+        : inputMethod === 'POST'
+          ? 'bg-orange-500 text-white'
+          : inputMethod === 'PUT'
+            ? 'bg-blue-600 text-white'
+            : inputMethod === 'DELETE'
+              ? 'bg-red-600 text-white'
+              : 'bg-gray-700 text-white'
+    }
+  `}
               >
-                {method}
-              </div>
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="PATCH">PATCH</option>
+              </select>
 
               <div className="flex items-center gap-2">
                 <input
-                  className="px-4! py-2! rounded-md bg-[#0b1220] border border-[#1f2937] w-[480px] text-sm"
-                  readOnly
-                  value={request?.url ?? ''}
+                  className="px-4! py-2! rounded-md bg-[#0b1220] border border-[#1f2937] w-[80vw] max-w-[700px] text-sm"
+                  onChange={(e) => {
+                    setInputValue(e.target.value)
+                  }}
+                  onBlur={() => {
+                    const id = convertId(request?._id)
+                    window.api.request.updateRequest({
+                      id: id,
+                      payload: { ...request, url: inputValue }
+                    })
+                  }}
+                  value={inputValue ?? ''}
                 />
                 <button
                   className="px-4! py-2! rounded-md bg-[#0ea5a4] hover:bg-[#06b2b0] text-black font-semibold shadow"
@@ -230,7 +262,7 @@ export default function RequestTester({ requestData }: any) {
 
         <div className="grid grid-cols-12 gap-6">
           {/* Left: Request and body */}
-          <div className="col-span-5 space-y-6">
+          {/* <div className="col-span-5 space-y-6">
             <div className="bg-[#071025] p-4! rounded-lg border border-[#11202b] shadow-sm">
               <div className="flex items-center justify-between mb-3!">
                 <div className="font-semibold">Request</div>
@@ -258,7 +290,18 @@ export default function RequestTester({ requestData }: any) {
                 </pre>
               </div>
             </div>
-          </div>
+          </div> */}
+
+          <RequestEditor
+            request={request}
+            onChange={(updated) => {}}
+            onApply={(finalRequest) => {
+              const itemId = convertId(finalRequest?._id)
+              window.api.request.updateRequest({ id: itemId, payload: finalRequest })
+              toast.success('Updated Successfully...')
+            }}
+            copyToClipboard={copyToClipboard}
+          />
 
           {/* Right: Response */}
           <div className="col-span-7">
@@ -267,7 +310,7 @@ export default function RequestTester({ requestData }: any) {
                 <div className="flex items-start  flex-col gap-3">
                   <div className="text-lg font-semibold">Response</div>
                   {response && (
-                    <div className="text-sm text-gray-300 max-w-[80%]  truncate">
+                    <div className="text-sm text-gray-300 max-w-[400px]   truncate">
                       {response.url && <span className="mr-2!">{response.url}</span>}
                     </div>
                   )}
@@ -505,6 +548,379 @@ const RequestHeader = ({ requestData, request, setRequest }: any) => {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function RequestEditor({
+  request = {},
+  onChange = (value: any) => {},
+  onApply = (any: any) => {},
+  copyToClipboard = (t) => {
+    navigator.clipboard && navigator.clipboard.writeText(t)
+    toast.success('Copied Successfullys')
+  }
+}: any) {
+  // ---------- helpers ----------
+  function formatBodyForDisplay(value) {
+    if (value === null || value === undefined)
+      return { text: '', kind: 'text', originalType: typeof value }
+
+    // String -> try JSON parse
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      try {
+        const parsed = JSON.parse(trimmed)
+        return { text: JSON.stringify(parsed, null, 2), kind: 'json', originalType: 'string' }
+      } catch {
+        return { text: value, kind: 'text', originalType: 'string' }
+      }
+    }
+
+    // FormData
+    if (value instanceof FormData) {
+      const entries: any = []
+      for (const [k, v] of value.entries()) {
+        if (v instanceof File) entries.push(`${k}: File(${v.name})`)
+        else entries.push(`${k}: ${v}`)
+      }
+      return { text: entries.join('\n'), kind: 'form', originalType: 'FormData' }
+    }
+
+    // URLSearchParams
+    if (value instanceof URLSearchParams) {
+      return { text: value.toString(), kind: 'params', originalType: 'URLSearchParams' }
+    }
+
+    // ArrayBuffer / TypedArray / Blob / File
+    if (
+      value instanceof ArrayBuffer ||
+      ArrayBuffer.isView(value) ||
+      value instanceof Blob ||
+      value instanceof File
+    ) {
+      return {
+        text: `[binary ${value.constructor.name}]`,
+        kind: 'binary',
+        originalType: value.constructor.name
+      }
+    }
+
+    // Plain object / array — pretty JSON
+    if (typeof value === 'object') {
+      try {
+        return { text: JSON.stringify(value, null, 2), kind: 'json', originalType: 'object' }
+      } catch {
+        return { text: String(value), kind: 'unknown', originalType: 'object' }
+      }
+    }
+
+    // fallback
+    try {
+      return { text: String(value), kind: 'text', originalType: typeof value }
+    } catch {
+      return { text: '', kind: 'unknown', originalType: typeof value }
+    }
+  }
+
+  // Convert headers object to array rows for editing
+  const initialHeaders = useMemo(() => {
+    const h = request.headers || {}
+    const entries = Object.entries(h || {})
+    if (!entries.length) return [{ id: `h-${Date.now()}`, key: '', value: '' }]
+    return entries.map(([k, v], i) => ({
+      id: `${k}-${i}`,
+      key: k,
+      value: v == null ? '' : String(v)
+    }))
+  }, [request])
+
+  // ---------- state ----------
+  const [headers, setHeaders] = useState(initialHeaders)
+  const formattedInitialBody = useMemo(() => formatBodyForDisplay(request?.body), [request?.body])
+  const [bodyText, setBodyText] = useState(formattedInitialBody.text)
+  const [originalBodyKind, setOriginalBodyKind] = useState(formattedInitialBody.kind)
+  const [jsonValid, setJsonValid] = useState(
+    formattedInitialBody.kind === 'json' || formattedInitialBody.kind === 'text'
+  )
+  const [dirty, setDirty] = useState(false)
+
+  // keep local state in sync when `request` prop changes (e.g., selecting a different request)
+  useEffect(() => {
+    setHeaders(initialHeaders)
+    const fb = formatBodyForDisplay(request?.body)
+    setBodyText(fb.text)
+    setOriginalBodyKind(fb.kind)
+    setJsonValid(fb.kind === 'json' || fb.kind === 'text')
+    setDirty(false)
+  }, [initialHeaders, request?.body])
+
+  // helper to convert header array -> object
+  function headersToObject(arr) {
+    const out = {}
+    arr.forEach(({ key, value }) => {
+      if (!key) return
+      out[String(key).trim()] = value == null ? '' : String(value)
+    })
+    return out
+  }
+
+  // inform parent about changes (call onChange)
+  function emitChange(nextHeaders = headers, nextBody = bodyText) {
+    const obj = {
+      ...request,
+      headers: headersToObject(nextHeaders),
+      body: nextBody
+    }
+    try {
+      onChange(obj)
+    } catch (e) {
+      console.warn('RequestEditor onChange threw', e)
+    }
+  }
+
+  // ---------- handlers ----------
+  function handleHeaderChange(id, field, val) {
+    const next = headers.map((h) => (h.id === id ? { ...h, [field]: val } : h))
+    setHeaders(next)
+    setDirty(true)
+    emitChange(next, bodyText)
+  }
+
+  function addHeaderRow() {
+    setHeaders((p) => {
+      const next = [...p, { id: `h-${Date.now()}`, key: '', value: '' }]
+      emitChange(next, bodyText)
+      return next
+    })
+    setDirty(true)
+  }
+
+  function removeHeaderRow(id) {
+    setHeaders((p) => {
+      const next = p.filter((h) => h.id !== id)
+      const safe = next.length ? next : [{ id: `h-${Date.now()}`, key: '', value: '' }]
+      emitChange(safe, bodyText)
+      return safe
+    })
+    setDirty(true)
+  }
+
+  function onBodyChange(val) {
+    setBodyText(val)
+    setDirty(true)
+    // validate JSON quickly
+    try {
+      if (val && typeof val === 'string') JSON.parse(val)
+      setJsonValid(true)
+    } catch (e) {
+      setJsonValid(false)
+    }
+    emitChange(headers, val)
+  }
+
+  function prettyFormatBody() {
+    try {
+      const parsed = JSON.parse(bodyText)
+      const pretty = JSON.stringify(parsed, null, 2)
+      setBodyText(pretty)
+      setJsonValid(true)
+      setDirty(true)
+      emitChange(headers, pretty)
+    } catch (e) {
+      // not JSON — don't change but indicate invalid
+      setJsonValid(false)
+      // optionally notify user
+    }
+  }
+
+  function resetToOriginal() {
+    const fb = formatBodyForDisplay(request?.body)
+    setHeaders(initialHeaders)
+    setBodyText(fb.text)
+    setOriginalBodyKind(fb.kind)
+    setJsonValid(fb.kind === 'json' || fb.kind === 'text')
+    setDirty(false)
+    emitChange(initialHeaders, fb.text)
+  }
+
+  // When user clicks Save - convert bodyText back to a sensible body type:
+  // - If originalBodyKind === 'json' -> try to JSON.parse(bodyText), fall back to string
+  // - Otherwise return as string (safe)
+  function applyChanges() {
+    let finalBody = bodyText
+    if (originalBodyKind === 'json') {
+      try {
+        finalBody = JSON.parse(bodyText)
+      } catch (e) {
+        // invalid JSON -> keep as string, but you might want to warn
+        finalBody = bodyText
+      }
+    } else if (originalBodyKind === 'params') {
+      // try to convert to URLSearchParams if input looks like params
+      try {
+        finalBody = new URLSearchParams(bodyText)
+      } catch {
+        finalBody = bodyText
+      }
+    } else if (originalBodyKind === 'form') {
+      // we cannot reliably reconstruct FormData from a text representation; keep string
+      finalBody = bodyText
+    } else {
+      // keep as string for text/binary/unknown
+      finalBody = bodyText
+    }
+
+    const finalRequest = {
+      ...request,
+      headers: headersToObject(headers),
+      body: finalBody
+    }
+
+    setDirty(false)
+    try {
+      onApply(finalRequest)
+    } catch (e) {
+      console.warn('RequestEditor onApply threw', e)
+    }
+  }
+
+  // copy headers+body as pretty JSON
+  function copyAllToClipboard() {
+    const out = {
+      headers: headersToObject(headers),
+      body: (() => {
+        // If JSON and parsable, copy parsed JSON; otherwise text
+        if (originalBodyKind === 'json') {
+          try {
+            return JSON.parse(bodyText)
+          } catch {
+            return bodyText
+          }
+        }
+        return bodyText
+      })()
+    }
+    try {
+      const txt = JSON.stringify(out, null, 2)
+      return copyToClipboard(txt)
+    } catch (e) {
+      try {
+        return copyToClipboard(String(out))
+      } catch (err) {
+        // ignore
+      }
+    }
+  }
+
+  // ---------- render ----------
+  return (
+    <div className="col-span-5 space-y-6!">
+      <div className="bg-[#071025] p-4! rounded-lg border border-[#11202b] shadow-sm">
+        <div className="flex items-center justify-between mb-3!">
+          <div className="font-semibold">Request</div>
+
+          <div className="flex items-center gap-2">
+            <button
+              className="px-2! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+              onClick={() => copyAllToClipboard()}
+            >
+              Copy Body & Headers
+            </button>
+          </div>
+        </div>
+
+        {/* Headers Editor */}
+        <div className="text-xs text-gray-300 mb-2!">Headers</div>
+        <div className="mb-3!">
+          <div className="space-y-2! max-h-[170px] overflow-auto scrollbar-hidden">
+            {headers.map((h) => (
+              <div key={h.id} className="flex gap-2! items-center">
+                <input
+                  className="flex-1 bg-[#0b1220] p-2! rounded border border-[#24303a] text-sm text-green-200"
+                  placeholder="Header name"
+                  value={h.key}
+                  onChange={(e) => handleHeaderChange(h.id, 'key', e.target.value)}
+                />
+                <input
+                  className="flex-2 bg-[#0b1220] p-2! rounded border border-[#24303a] text-sm text-green-200"
+                  placeholder="Header value"
+                  value={h.value}
+                  onChange={(e) => handleHeaderChange(h.id, 'value', e.target.value)}
+                />
+                <button
+                  title="Remove header"
+                  onClick={() => removeHeaderRow(h.id)}
+                  className="px-2! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <div>
+              <button
+                onClick={addHeaderRow}
+                className="px-3! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+              >
+                + Add Header
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Body Editor */}
+        <div className="text-xs text-gray-300 mb-2!">Body</div>
+        <div className="mb-3">
+          <textarea
+            value={bodyText}
+            onChange={(e) => onBodyChange(e.target.value)}
+            className="w-full bg-[#001219] p-3! rounded text-sm text-green-200 overflow-auto max-h-60 whitespace-pre-wrap font-mono"
+            rows={10}
+            placeholder="Request body (JSON or text)"
+          />
+        </div>
+
+        {/* Footer Controls */}
+        <div className="flex items-center justify-between gap-3!">
+          <div className="flex gap-2! items-center">
+            <button
+              className="px-3! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+              onClick={prettyFormatBody}
+            >
+              Pretty JSON
+            </button>
+
+            <button
+              className="px-3! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+              onClick={() => copyToClipboard(bodyText ?? '')}
+            >
+              Copy Body
+            </button>
+
+            <button
+              className="px-3! py-1! text-xs border border-[#24303a] rounded hover:bg-[#0b1220]"
+              onClick={resetToOriginal}
+            >
+              Reset
+            </button>
+          </div>
+
+          <div className="flex gap-2! items-center">
+            <div className="text-xs text-gray-400 mr-2!">
+              {jsonValid ? null : <span className="text-red-400">Invalid JSON</span>}
+            </div>
+
+            <button
+              onClick={applyChanges}
+              className={`px-3! py-1! text-xs rounded font-semibold ${dirty ? 'bg-emerald-400 text-black' : 'bg-gray-800 text-gray-300'}`}
+              disabled={!dirty}
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
