@@ -1,8 +1,8 @@
-import { MdDarkMode, MdOutlineLightMode } from 'react-icons/md'
+import { MdDarkMode, MdDelete, MdOutlineLightMode } from 'react-icons/md'
 import Header from '../header'
 import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
-import { TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
+import { TbDots, TbDotsVertical, TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
 import { IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -14,6 +14,7 @@ import GlassBlurModal from '../glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
 import { ApiTestingEventType } from '@shared/eventType'
 import toast from 'react-hot-toast'
+import { FaAngleDown, FaPlus } from 'react-icons/fa'
 
 const SideBar = () => {
   const { isSidebarExpanded, activePage } = useThemeContext() || {}
@@ -194,9 +195,8 @@ const SidebarMainContent = () => {
 const SidebarApiTestingContent = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [collections, setCollections] = useState([])
-  const [selectedCollection, setSelectedCollection] = useState('GET')
+  const [selectedCollection, setSelectedCollection] = useState({})
   const typeRef = useRef('')
-
   const handleApiTestingEvent = useCallback((event: any) => {
     if (!event) return
     switch (event.type) {
@@ -210,7 +210,6 @@ const SidebarApiTestingContent = () => {
         console.warn('Unknown network event type', event)
     }
   }, [])
-
   useEffect(() => {
     const loadInitial = async () => {
       // environment
@@ -229,6 +228,28 @@ const SidebarApiTestingContent = () => {
     }
   }, [])
 
+  const handleAdd = async (e, item, id) => {
+    e.stopPropagation()
+    const requestPayload = {
+      id: Date.now(),
+      method: 'GET',
+      title: '',
+      url: '',
+      headers: {}
+    }
+    const docs = [...item?.docs, requestPayload]
+    const updatedItem = { ...item, docs }
+    try {
+      await window.api.apiTesting.updateCollection({
+        id,
+        payload: updatedItem
+      })
+      setSelectedCollection({ ...selectedCollection, [id]: updatedItem })
+    } catch (error) {
+      setSelectedCollection({ ...selectedCollection, [id]: item })
+    }
+  }
+
   return (
     <div className="flex flex-col px-5! py-4! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
       <div className="flex items-center justify-between gap-2 select-none">
@@ -246,7 +267,51 @@ const SidebarApiTestingContent = () => {
 
       <div>
         {collections.map((item: any) => {
-          return <p>{item?.title}</p>
+          const id = convertId(item?._id)
+          const collection = selectedCollection[id]
+
+          return (
+            <div key={id}>
+              <p
+                onClick={() => {
+                  if (collection) {
+                    setSelectedCollection({ ...selectedCollection, [id]: null })
+                  }
+                  if (!collection) {
+                    setSelectedCollection({ ...selectedCollection, [id]: item })
+                  }
+                }}
+                className="text-sm uppercase text-gray-300 cursor-pointer p-1.5! px-2! rounded-md hover:bg-[#191919] flex items-center justify-between select-none"
+              >
+                <span>{item?.title}</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    onClick={async (e) => {
+                      handleAdd(e, item, id)
+                    }}
+                    className="p-[5px]! rounded-sm hover:bg-[#393939]"
+                  >
+                    <FaPlus />
+                  </span>
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation()
+                    }}
+                    className="p-[5px]!  rounded-sm hover:bg-[#393939]"
+                  >
+                    <TbDots />
+                  </span>
+                </div>
+              </p>
+              {collection && (
+                <ShowSelectedCollections
+                  key={collection?.docs?.length}
+                  selectedCollections={collection}
+                  setSelectedCollection={setSelectedCollection}
+                />
+              )}
+            </div>
+          )
         })}
       </div>
 
@@ -258,6 +323,45 @@ const SidebarApiTestingContent = () => {
           selectedData={{}}
         />
       </GlassBlurModal>
+    </div>
+  )
+}
+
+const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }: any) => {
+  const { docs, _id } = selectedCollections
+  const id = convertId(_id)
+  const handleDelete = async (e, item) => {
+    e.stopPropagation()
+    const filterDocs = docs?.filter((itm) => {
+      return itm?.id != item?.id
+    })
+    const updatedCollection = { ...selectedCollections, docs: filterDocs }
+    await window.api.apiTesting.updateCollection({
+      id,
+      payload: updatedCollection
+    })
+    setSelectedCollection({ ...selectedCollections, [id]: updatedCollection })
+  }
+  return (
+    <div key={id} className="pl-1.5!">
+      {docs.map((item, index) => {
+        return (
+          <p
+            key={item?.id || index}
+            className="text-[13px] uppercase flex items-center justify-between p-2! py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer"
+          >
+            <span>{item?.method}</span>
+            <span
+              onClick={async (e) => {
+                handleDelete(e, item)
+              }}
+              className="p-[5px]!  rounded-sm hover:bg-[#393939]"
+            >
+              <MdDelete className="" />
+            </span>
+          </p>
+        )
+      })}
     </div>
   )
 }

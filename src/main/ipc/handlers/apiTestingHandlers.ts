@@ -141,6 +141,7 @@ export function registorApiTestingHandler() {
 
     return []
   })
+
   ipcMain.handle(Channels.apiTesting.DeleteCollection, async (_: any, query: string) => {
     const id = query
     const db = getDb()
