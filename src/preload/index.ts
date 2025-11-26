@@ -5,6 +5,7 @@ import { consoleApi } from './apis/console'
 import { networkApi } from './apis/network'
 import { Channels } from '../shared/channels'
 import { requestApi } from './apis/request'
+import { apiTestingApi } from './apis/apiTesting'
 
 function flattenChannelValues(obj: any): string[] {
   const out: string[] = []
@@ -39,6 +40,7 @@ if (process.contextIsolated) {
       console: consoleApi,
       network: networkApi,
       request: requestApi,
+      apiTesting: apiTestingApi,
       // low-level invoke if you need custom access (still guarded)
       invoke: safeInvoke
     })

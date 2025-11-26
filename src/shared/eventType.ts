@@ -20,3 +20,9 @@ export const RequestEventType = {
   NewRequest: 'newRequest',
   UpdateRequest: 'updateRequest'
 }
+
+export const ApiTestingEventType = {
+  UpdateEnvironment: 'updateEnvironment',
+  UpdateCollection: 'updateCollection',
+  Message: 'message'
+}

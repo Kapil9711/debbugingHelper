@@ -30,10 +30,21 @@ export const Channels = {
     DeleteRequest: 'request:delete-request',
     UpdateRequest: 'request:update-request'
   },
+  apiTesting: {
+    GetEnvironments: 'apiTesting:get-environments',
+    SetEnvironment: 'apiTesting:set-environment',
+    DeleteEnvironment: 'apiTesting:delete-environment',
+    UpdateEnvironment: 'apiTesting:update-environment',
+    GetCollections: 'apiTesting:get-collections',
+    SetCollection: 'apiTesting:set-collection',
+    DeleteCollection: 'apiTesting:delete-collection',
+    UpdateCollection: 'apiTesting:update-collection'
+  },
   events: {
     ConsoleUpdated: 'event:console-updated',
     NetworkUpdated: 'event:network-updated',
-    RequestUpdated: 'event:request-updated'
+    RequestUpdated: 'event:request-updated',
+    apiTestingUpdated: 'event:apiTesting-updated'
   }
 } as const
 

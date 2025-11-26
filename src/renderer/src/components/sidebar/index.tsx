@@ -7,61 +7,37 @@ import { VscDebugConsole } from 'react-icons/vsc'
 import { IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { GiNetworkBars } from 'react-icons/gi'
-import { GrTest } from 'react-icons/gr'
+import { GrRevert, GrTest } from 'react-icons/gr'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { CiEdit } from 'react-icons/ci'
+import GlassBlurModal from '../glassBodyModal'
+import { convertId } from '@renderer/utlis/dbHelper'
+import { ApiTestingEventType } from '@shared/eventType'
+import toast from 'react-hot-toast'
 
 const SideBar = () => {
-  const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded } = useThemeContext()
+  const { isSidebarExpanded, activePage } = useThemeContext() || {}
+  const [localActivePage, setLocalActivePage] = useState(activePage)
+  useEffect(() => {
+    setLocalActivePage(activePage)
+  }, [activePage])
 
   return (
     <div
       className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full mobile:max-w-[250px] tabletS:max-w-[280px] tabletL:max-w-[300px]  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)] border-r-[.5px] border-gray-400`}
     >
-      <Header>
-        <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center   px-4! ">
-          {isSidebarExpanded && (
-            <div className="flex items-center gap-3">
-              <img
-                src={profileImage}
-                alt="logo"
-                className="h-8 w-8 block rounded-full bg-cover object-cover "
-              />
-              <p className="text-[13px] tracking-[.9px] font-medium">Kapil's Production</p>
-            </div>
-          )}
+      <SidebarHeader localActivePage={localActivePage} setLocalActivePage={setLocalActivePage} />
 
-          <div className="flex items-center gap-2">
-            <TbLayoutSidebarRightCollapseFilled
-              onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-              className="cursor-pointer"
-              size={isSidebarExpanded ? 19 : 22}
-              color={theme == 'light' ? 'black' : 'white'}
-            />
+      {localActivePage == '' && <SidebarMainContent />}
 
-            {isSidebarExpanded && (
-              <p
-                onClick={toggleTheme}
-                className={`h-6 w-6  rounded-full flex justify-center items-center ${theme == 'dark' ? 'bg-[#dddcdc]' : 'bg-[#323131]'}  cursor-pointer`}
-              >
-                {theme == 'dark' && (
-                  <span>
-                    <MdOutlineLightMode color={'black'} size={14} />
-                  </span>
-                )}
-                {theme == 'light' && (
-                  <span className="">
-                    <MdDarkMode size={14} color="white" />
-                  </span>
-                )}
-              </p>
-            )}
-          </div>
-        </div>
-      </Header>
-      <SidebarContent />
+      {localActivePage == 'api-testing' && <SidebarApiTestingContent />}
+
       <BottomContent />
     </div>
   )
 }
+
+// main side bar
 
 const sidebarData = [
   { title: 'Console', icon: <VscDebugConsole />, url: '/' },
@@ -69,8 +45,108 @@ const sidebarData = [
   { title: 'Api Testing', icon: <GrTest />, url: '/api-testing' }
 ]
 
-const SidebarContent = () => {
-  const { isSidebarExpanded } = useThemeContext()
+const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
+  const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded, activePage } =
+    useThemeContext() || {}
+
+  return (
+    <Header>
+      <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center relative  px-4! ">
+        {isSidebarExpanded && (
+          <div className="flex items-center gap-3">
+            <img
+              src={profileImage}
+              alt="logo"
+              className="h-8 w-8 block rounded-full bg-cover object-cover "
+            />
+            <p className="text-[13px] tracking-[.9px] font-medium">Kapil's Production</p>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          <TbLayoutSidebarRightCollapseFilled
+            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+            className="cursor-pointer"
+            size={isSidebarExpanded ? 19 : 22}
+            color={theme == 'light' ? 'black' : 'white'}
+          />
+
+          {isSidebarExpanded && (
+            <p
+              onClick={toggleTheme}
+              className={`h-6 w-6  rounded-full flex justify-center items-center ${theme == 'dark' ? 'bg-[#dddcdc]' : 'bg-[#323131]'}  cursor-pointer`}
+            >
+              {theme == 'dark' && (
+                <span>
+                  <MdOutlineLightMode color={'black'} size={14} />
+                </span>
+              )}
+              {theme == 'light' && (
+                <span className="">
+                  <MdDarkMode size={14} color="white" />
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+
+        {isSidebarExpanded && activePage && (
+          <>
+            <p
+              onClick={() => {
+                if (localActivePage == activePage) {
+                  setLocalActivePage('')
+                } else setLocalActivePage(activePage)
+              }}
+              className="absolute bottom-1.5 right-5 cursor-pointer select-none"
+            >
+              <GrRevert />
+            </p>
+          </>
+        )}
+      </div>
+    </Header>
+  )
+}
+
+const BottomContent = () => {
+  const { isSidebarExpanded, setActivePage } = useThemeContext()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const path = location.pathname
+
+  return (
+    <div
+      className={`h-20 px-5!  w-full flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'}  items-center`}
+    >
+      <p
+        onClick={() => {
+          setActivePage('')
+          navigate('/settings')
+        }}
+        // key={index}
+        className={` shrink-0 h-9!  ${path == '/settings' ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
+      >
+        <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
+          <IoIosSettings />
+        </span>
+        {isSidebarExpanded && (
+          <span className="uppercase font-[450] text-[15px] tracking-[.8px]">Settings</span>
+        )}
+      </p>
+      {/* <p className="flex items-center gap-4 ">
+        <span>
+          <IoIosSettings size={20} color={theme == 'light' ? 'black' : 'white'} />
+        </span>
+        {isSidebarExpanded && <span>Settings</span>}
+      </p> */}
+    </div>
+  )
+}
+
+// sidebar content
+const SidebarMainContent = () => {
+  const { isSidebarExpanded, setActivePage } = useThemeContext() || {}
   const navigate = useNavigate()
   const location = useLocation()
   const path = location.pathname
@@ -84,6 +160,11 @@ const SidebarContent = () => {
             // onMouseEnter={() => setIsHovered(index)}
             // onMouseLeave={() => setIsHovered('')}
             onClick={() => {
+              if (item?.url == '/api-testing') {
+                setActivePage('api-testing')
+              } else {
+                setActivePage('')
+              }
               navigate(item?.url)
             }}
             key={index}
@@ -110,36 +191,110 @@ const SidebarContent = () => {
   )
 }
 
-const BottomContent = () => {
-  const { isSidebarExpanded } = useThemeContext()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const path = location.pathname
+const SidebarApiTestingContent = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [collections, setCollections] = useState([])
+  const [selectedCollection, setSelectedCollection] = useState('GET')
+  const typeRef = useRef('')
+
+  const handleApiTestingEvent = useCallback((event: any) => {
+    if (!event) return
+    switch (event.type) {
+      case ApiTestingEventType.UpdateCollection:
+        setCollections(event.payload)
+        break
+      case ApiTestingEventType.Message:
+        toast.success(event.payload)
+        break
+      default:
+        console.warn('Unknown network event type', event)
+    }
+  }, [])
+
+  useEffect(() => {
+    const loadInitial = async () => {
+      // environment
+
+      const collectionData = await window.api.apiTesting.getCollections('')
+      setCollections(collectionData)
+    }
+    loadInitial()
+    const unsubscribe =
+      window.api.apiTesting.onUpdated?.((payload) => {
+        handleApiTestingEvent(payload)
+      }) ?? (() => {})
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   return (
-    <div
-      className={`h-20 px-5!  w-full flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'}  items-center`}
-    >
-      <p
-        onClick={() => {
-          navigate('/settings')
-        }}
-        // key={index}
-        className={` shrink-0 h-9!  ${path == '/settings' ? 'bg-[var(--rev-bg-sidebar)] text-[var(--rev-text)]' : ''} w-full border-l-4 border-r-4 border-t-1 border-b-1 border-[var(--rev-bg-sidebar)] rounded-lg cursor-pointer flex ${isSidebarExpanded ? 'justify-start' : 'justify-center'} items-center gap-2 hover:bg-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)] transition-all duration-100 ease-in select-none ${!isSidebarExpanded ? '!pl-0' : '!pl-[10px]'} `}
-      >
-        <span className="text-[20px] hover:text-[var(--rev-bg-sidebar)] hover:text-[var(--rev-text)]">
-          <IoIosSettings />
-        </span>
-        {isSidebarExpanded && (
-          <span className="uppercase font-[450] text-[15px] tracking-[.8px]">Settings</span>
-        )}
-      </p>
-      {/* <p className="flex items-center gap-4 ">
-        <span>
-          <IoIosSettings size={20} color={theme == 'light' ? 'black' : 'white'} />
-        </span>
-        {isSidebarExpanded && <span>Settings</span>}
-      </p> */}
+    <div className="flex flex-col px-5! py-4! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
+      <div className="flex items-center justify-between gap-2 select-none">
+        <p className="text-sm text-[#e7e7e7] uppercase">Collections</p>
+        <button
+          onClick={() => {
+            typeRef.current = 'Add'
+            setIsOpen(true)
+          }}
+          className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer"
+        >
+          + Add
+        </button>
+      </div>
+
+      <div>
+        {collections.map((item: any) => {
+          return <p>{item?.title}</p>
+        })}
+      </div>
+
+      <GlassBlurModal isOpen={isOpen} onClose={() => setIsOpen(false)} maxWidth="max-w-md">
+        <AddEditModal
+          setIsOpen={setIsOpen}
+          type={typeRef.current}
+          initalTitle={typeRef.current == 'Add' ? '' : ''}
+          selectedData={{}}
+        />
+      </GlassBlurModal>
+    </div>
+  )
+}
+
+const AddEditModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
+  const [title, setTitle] = useState(initalTitle)
+  return (
+    <div className="flex items-center justify-center flex-col gap-5 py-3!">
+      <p className="text-center text-[#b5b5b5] text-sm ">{type} Collection</p>
+      <div className="flex  gap-2">
+        <input
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+          }}
+          placeholder="Enter Title"
+          type="text"
+          className="bg-[#232323] px-3! py-1! text-sm rounded-md outline-none border border-[#3b3a3a]"
+        />
+        <button
+          onClick={() => {
+            if (type == 'Add') {
+              window.api.apiTesting.setCollection({ title })
+              setIsOpen(false)
+            }
+            if (type == 'Edit') {
+              const id = convertId(selectedData?._id)
+              const payload = { ...selectedData, title }
+              window.api.apiTesting.updateCollection({ id, payload })
+              setIsOpen(false)
+            }
+          }}
+          className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2 max-w-[50%] mx-auto!"
+        >
+          {type == 'Add' ? 'Create' : 'Submit'}
+        </button>
+      </div>
     </div>
   )
 }

@@ -50,6 +50,18 @@ declare global {
         updateRequest: (query: any) => Promise<any>
         onUpdated?: (callback: (data: any) => void) => Unsubscribe
       }
+
+      apiTesting: {
+        getEnvironments: (query: string) => Promise<any>
+        setEnvironment: (request: any) => Promise<any>
+        deleteEnvironment: (query: string) => Promise<any>
+        updateEnvironment: (query: any) => Promise<any>
+        getCollections: (query: string) => Promise<any>
+        setCollection: (request: any) => Promise<any>
+        deleteCollection: (query: string) => Promise<any>
+        updateCollection: (query: any) => Promise<any>
+        onUpdated?: (callback: (data: any) => void) => Unsubscribe
+      }
       /**
        * Low-level guarded invoke (optional)
        */
