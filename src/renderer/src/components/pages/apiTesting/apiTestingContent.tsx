@@ -2,8 +2,14 @@ import { useState } from 'react'
 import { MdOutlineDelete } from 'react-icons/md'
 
 const ApiTestingContent = () => {
+  const { request } = useApiTestingContext()
+  let id = ''
+  if (request?._id) {
+    id = convertId(request?._id)
+  }
+
   return (
-    <div className="p-5! py-3! relative h-full">
+    <div key={id} className="p-5! py-3! relative h-full">
       <SearchHeader />
       <RequestData />
       <ResponseData />
@@ -12,33 +18,109 @@ const ApiTestingContent = () => {
 }
 
 const SearchHeader = () => {
-  const inputMethod = 'GET'
+  const [inputMethod, setInputMethod] = useState('GET')
+  const [inputValue, setInputValue] = useState('')
+  const { request } = useApiTestingContext()
+  const [collections, setCollections] = useState([])
+  const [requestLoading, setRequestLoading] = useState(false)
+  useEffect(() => {
+    const loadInitial = async () => {
+      const collectionData = await window.api.apiTesting.getCollections('')
+      setCollections(collectionData)
+    }
+    loadInitial()
+  }, [])
+  useEffect(() => {
+    setInputMethod(request?.method || 'GET')
+    setInputValue(request?.url || '')
+  }, [request])
+
+  async function runTest() {
+    try {
+      setRequestLoading(true)
+      const safeRequest = {
+        url: inputValue,
+        method: inputMethod,
+        body: String(request?.method).toLowerCase() == 'get' ? undefined : request?.body,
+        headers: request?.headers ?? {}
+      }
+      const res = await window.api.network.runRequest(safeRequest)
+      const idString = convertId(request?._id)
+      const payload = {
+        ...request,
+        url: inputValue,
+        method: inputMethod,
+        response: res
+      }
+      window.api.request.updateRequest({ id: idString, payload })
+    } catch (err: any) {
+      toast.error(String(err?.message ?? err))
+    } finally {
+      setRequestLoading(false)
+    }
+  }
+
+  let id = ''
+  let collectionId = request?.collectionId
+  if (request?._id) {
+    id = convertId(request?._id)
+  }
+  let selectedCollection: any = null
+  if (collectionId) {
+    const obj = collections?.find((item: any) => {
+      const itemId = convertId(item?._id)
+      return itemId == collectionId
+    })
+    selectedCollection = obj
+  }
+
+  const handleUpdateCollection = (e: any, type: any) => {
+    if (selectedCollection) {
+      const { docs } = selectedCollection
+      const initialDco = docs?.find((item) => item?.id == request?.id)
+      if (initialDco) {
+        const filterDoc = docs?.filter((item) => item?.id != request?.id)
+        if (type == 'method') {
+          initialDco.method = e.target.value
+        }
+        if (type == 'url') {
+          initialDco.url = e.target.value
+        }
+        window.api.apiTesting.updateCollection({
+          id: collectionId,
+          payload: { ...selectedCollection, docs: [...filterDoc, initialDco] }
+        })
+      }
+    }
+  }
+
+  const methodColor =
+    inputMethod === 'GET'
+      ? 'bg-green-600 text-white'
+      : inputMethod === 'POST'
+        ? 'bg-orange-500 text-white'
+        : inputMethod === 'PUT'
+          ? 'bg-blue-600 text-white'
+          : inputMethod === 'DELETE'
+            ? 'bg-red-600 text-white'
+            : 'bg-gray-700 text-white'
+
   return (
     <div className="h-[50px]  flex items-center  gap-5">
       <select
         value={inputMethod}
-        // onChange={(e) => {
-        //   setInputMethod(e.target.value)
-        //   const idString = convertId(request?._id)
-        //   const payload = {
-        //     ...request,
-        //     method: e.target.value
-        //   }
-        //   window.api.request.updateRequest({ id: idString, payload })
-        // }}
+        onChange={(e) => {
+          setInputMethod(e.target.value)
+          const payload = {
+            ...request,
+            method: e.target.value
+          }
+          window.api.request.updateRequest({ id: id, payload })
+          handleUpdateCollection(e, 'method')
+        }}
         className={`
     px-3! py-2! rounded font-semibold text-sm shadow-sm cursor-pointer outline-none
-    ${
-      inputMethod === 'GET'
-        ? 'bg-green-600 text-white'
-        : inputMethod === 'POST'
-          ? 'bg-orange-500 text-white'
-          : inputMethod === 'PUT'
-            ? 'bg-blue-600 text-white'
-            : inputMethod === 'DELETE'
-              ? 'bg-red-600 text-white'
-              : 'bg-gray-700 text-white'
-    }
+    ${methodColor}
   `}
       >
         <option value="GET">GET</option>
@@ -48,25 +130,107 @@ const SearchHeader = () => {
         <option value="PATCH">PATCH</option>
       </select>
       <input
+        value={inputValue}
+        onChange={(e) => {
+          const value = e.target.value
+          setInputValue(value)
+          const payload = {
+            ...request,
+            url: e.target.value
+          }
+          window.api.request.updateRequest({ id: id, payload })
+          handleUpdateCollection(e, 'url')
+        }}
         type="text"
         className="h-[38px] shadow-sm w-[65%] border border-gray-400 rounded-md px-3! outline-none text-sm"
       />
 
-      <button className="bg-blue-600 rounded-md px-7! py-[9px]! text-sm cursor-pointer">
+      <button
+        onClick={() => {
+          runTest()
+        }}
+        className="bg-blue-600 rounded-md px-7! py-[9px]! text-sm cursor-pointer flex items-center gap-2"
+      >
+        {requestLoading && <FaSpinner className="animate-spin" />}
         SEND
       </button>
+      <TopBarLoader color={methodColor} loading={requestLoading} />
     </div>
   )
 }
 
 const ResponseData = () => {
+  const { request } = useApiTestingContext()
+  const { response = null } = request || {}
+
+  function copyToClipboard(text: string) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast.success('Copied to clipboard'))
+      .catch(() => toast.error('Copy failed'))
+  }
   return (
     <ResizableBottomPanel initialHeight={320}>
       <div className="py-1!">
         <p className="text-sm font-light">Response</p>
-
-        <div className="flex justify-center items-center min-h-[300px]!  mt-3!">
-          <p className="text-sm text-gray-500 ">Click Send To Get A Response</p>
+        <div className="flex items-center min-h-[300px]! overflow-auto scrollbar-hidden">
+          {!response ? (
+            <p className="text-sm text-gray-500 ">Click Send To Get A Response</p>
+          ) : response?.error ? (
+            <div className="text-red-400">{response.error}</div>
+          ) : response?.bodyIsBase64 ? (
+            <div className="space-y-3">
+              <div className="text-sm text-gray-300">Binary response (base64)</div>
+              <div className="flex gap-2">
+                <button
+                  className="px-3! py-2! rounded bg-[#0ea5a4] text-black"
+                  // onClick={() =>
+                  //   downloadBase64AsFile(
+                  //     response.body,
+                  //     `response-${Date.now()}.bin`,
+                  //     response.headers?.['content-type'] ?? 'application/octet-stream'
+                  //   )
+                  // }
+                >
+                  Download Binary
+                </button>
+                <button
+                  className="px-3! py-2! rounded border border-[#24303a] hover:bg-[#0b1220]"
+                  onClick={() => {
+                    copyToClipboard(response.body)
+                    toast.success('Base64 copied')
+                  }}
+                >
+                  Copy Base64
+                </button>
+                <div className="text-sm text-gray-400 flex items-center">
+                  Size: {response.bodySize ?? '—'} bytes
+                </div>
+              </div>
+            </div>
+          ) : isSafeToParse(response.body) ? (
+            <div className=" p-4! rounded text-sm text-yellow-200 overflow-auto h-fit">
+              <ReactJson
+                style={{
+                  width: 'fit-content',
+                  paddingBlock: '10px',
+                  background: 'transparent',
+                  height: 'fit-content'
+                }}
+                src={safeParseJSON(response.body)}
+                theme="summerfruit"
+                name={'Response'}
+                collapsed={1}
+                enableClipboard={true}
+                displayDataTypes={true}
+              />
+              {/* {prettyJSON(response.body)} */}
+            </div>
+          ) : (
+            <div className=" p-4! rounded text-sm text-yellow-200 overflow-auto max-h-[550px]">
+              <pre className="text-red-400">{response.body}</pre>
+            </div>
+          )}
         </div>
       </div>
     </ResizableBottomPanel>
@@ -76,6 +240,12 @@ const ResponseData = () => {
 import { useCallback, useEffect, useRef } from 'react'
 import JsonBodyEditor from '@renderer/components/jsonBodyEditor'
 import toast from 'react-hot-toast'
+import { useApiTestingContext } from '@renderer/screen/apiTesting'
+import { convertId } from '@renderer/utlis/dbHelper'
+import { isSafeToParse, safeParseJSON } from '../network/testRequest'
+import ReactJson from 'react-json-view'
+import { FaSpinner } from 'react-icons/fa'
+import TopBarLoader from '@renderer/components/topLoaderBar'
 
 function ResizableBottomPanel({
   initialHeight = 320,
@@ -229,7 +399,6 @@ const RequestData = () => {
   const [activeTab, setActiveTab] = useState('params')
   const [queryParams, setQueryParams] = useState([{ key: '', value: '', active: false }])
   const [headers, setHeaders] = useState([{ key: '', value: '', active: false }])
-
   const title = activeTab == 'params' ? 'Query Params' : activeTab == 'headers' ? 'Headers' : 'Body'
 
   const [obj, setObj] = useState({

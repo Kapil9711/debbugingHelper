@@ -5,6 +5,7 @@ import { CiEdit } from 'react-icons/ci'
 import { useRef, useState } from 'react'
 import GlassBlurModal from '@renderer/components/glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
+import { IoMdClose } from 'react-icons/io'
 
 const ApiTestingHeader = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -12,17 +13,34 @@ const ApiTestingHeader = () => {
     selectedEnvironment,
     setSelectedEnvironment,
     environments,
+    requests,
+    request,
+    setRequest,
     collections,
     selectedCollection,
     setSelectedCollection
   } = useApiTestingContext()
   const typeRef = useRef('Add')
 
+  const methodColor =
+    request?.method === 'GET'
+      ? 'text-green-600'
+      : request?.method === 'POST'
+        ? 'text-orange-500'
+        : request?.method === 'PUT'
+          ? 'text-blue-600'
+          : request?.method === 'DELETE'
+            ? 'text-red-600'
+            : 'text-gray-700'
+
   return (
     <Header>
       <div className="h-full w-full border-b border-gray-400">
-        <div className="h-[50%]  w-full flex justify-between items-center px-5!">
-          <div className="flex items-center gap-2">
+        <div className="h-[45%] w-full flex items-end ">
+          <RequestHeader requestData={requests} request={request} setRequest={setRequest} />
+        </div>
+        <div className="h-[55%]   w-full flex justify-between  items-center px-5!">
+          {/* <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 setIsOpen(true)
@@ -44,7 +62,31 @@ const ApiTestingHeader = () => {
                 <CiEdit /> Edit
               </button>
             )}
+          </div> */}
+
+          <div className="w-[80%] flex items-center gap-1 relative ">
+            <button
+              className={` rounded-md px-2! h-[90%] text-sm cursor-pointer flex items-center gap-2 ${methodColor} absolute left-[2px]`}
+            >
+              {request?.method}
+            </button>
+            <input
+              value={request?.title || request?.url}
+              // onChange={(e) => {
+              //   const value = e.target.value
+              //   setInputValue(value)
+              //   const payload = {
+              //     ...request,
+              //     url: e.target.value
+              //   }
+              //   window.api.request.updateRequest({ id: id, payload })
+              //   handleUpdateCollection(e, 'url')
+              // }}
+              type="text"
+              className="h-[30px] shadow-sm w-[65%] border-[.5px] border-[#3c3c3c] rounded-md px-3! outline-none text-sm pl-[65px]! bg-[#131313]"
+            />
           </div>
+
           <div className="flex items-center justify-center gap-5">
             <select
               value={selectedEnvironment?.title || 'No Environment'}
@@ -75,7 +117,6 @@ const ApiTestingHeader = () => {
             </button>
           </div>
         </div>
-        <div className="h-[50%] w-full"></div>
       </div>
 
       <GlassBlurModal isOpen={isOpen} onClose={() => setIsOpen(false)} maxWidth="max-w-md">
@@ -123,6 +164,64 @@ const AddEditModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
           {type == 'Add' ? 'Create' : 'Submit'}
         </button>
       </div>
+    </div>
+  )
+}
+
+const RequestHeader = ({ requestData, request, setRequest }: any) => {
+  const [hoveredId, setHoveredId] = useState('')
+
+  // console.log(requestData, request, 'requests')
+
+  return (
+    <div className=" h-full w-full flex items-center px-6! gap-4 overflow-auto scrollbar-hidden">
+      {requestData?.map((item: any) => {
+        const itemId = convertId(item?._id)
+        const dataId = convertId(request?._id)
+        const isSelectedItem = itemId === dataId
+        const isHoveredItem = hoveredId == convertId(item?._id)
+        const url = item?.url
+        let path = item?.url
+
+        if (url) {
+          try {
+            path = new URL(url, 'http://dummy.com').pathname
+          } catch (error) {}
+        }
+
+        return (
+          <div
+            key={itemId}
+            onClick={() => {
+              setRequest(item)
+            }}
+            onMouseEnter={() => {
+              const id = convertId(item?._id)
+              setHoveredId(id)
+            }}
+            onMouseLeave={() => {
+              setHoveredId('')
+            }}
+            className={`w-[140px] relative cursor-pointer select-none hover:bg-[var(--rev-bg-header)] hover:text-[var(--rev-text)] h-[30px] border p-1! px-2! rounded-md  ${isSelectedItem ? 'bg-[var(--rev-bg-header)]  text-[var(--rev-text)]' : 'text-[var(--text)]'} flex items-center  gap-1`}
+          >
+            <p className="text-sm leading-[1.2]">{item?.method}</p>
+            <p className="text-xs truncate">{path}</p>
+
+            {(isHoveredItem || isSelectedItem) && (
+              <>
+                <p
+                  onClick={async () => {
+                    await window.api.request.deleteRequest(itemId)
+                  }}
+                  className="absolute right-1 top-[1px] "
+                >
+                  <IoMdClose size={14} />
+                </p>
+              </>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import ApiTestingContent from '@renderer/components/pages/apiTesting/apiTestingContent'
 import ApiTestingHeader from '@renderer/components/pages/apiTesting/apiTestingHeader'
-import { ApiTestingEventType } from '@shared/eventType'
+import { ApiTestingEventType, RequestEventType } from '@shared/eventType'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -12,6 +12,8 @@ const ApiTesting = () => {
   const [collections, setCollections] = useState([])
   const [selectedEnvironment, setSelectedEnvironment] = useState('GET')
   const [selectedCollection, setSelectedCollection] = useState('GET')
+  const [requests, setRequests] = useState([] as any)
+  const [request, setRequest] = useState({})
 
   const handleApiTestingEvent = useCallback((event: any) => {
     if (!event) return
@@ -30,11 +32,31 @@ const ApiTesting = () => {
     }
   }, [])
 
+  const handleRequestEvent = useCallback((event: any) => {
+    if (!event) return
+    switch (event.type) {
+      case RequestEventType.NewRequest:
+        setRequests((prev: any) => [event.payload, ...prev])
+        setRequest(event.payload)
+
+        break
+      case RequestEventType.UpdateRequest:
+        setRequests(event.payload || [])
+        setRequest(event.payload[0] || {})
+        break
+      default:
+        console.warn('Unknown network event type', event)
+    }
+  }, [])
+
   useEffect(() => {
     const loadInitial = async () => {
       // environment
       const environmentData = await window.api.apiTesting.getEnvironments('')
       const collectionData = await window.api.apiTesting.getCollections('')
+      const requestArr = await window.api.request.getRequest('')
+      setRequests(requestArr)
+      setRequest(requestArr[0] || {})
       setEnvironments(environmentData)
       setCollections(collectionData)
     }
@@ -44,8 +66,13 @@ const ApiTesting = () => {
         handleApiTestingEvent(payload)
       }) ?? (() => {})
 
+    const unsubscribeRequest =
+      window.api.request.onUpdated?.((payload) => {
+        handleRequestEvent(payload)
+      }) ?? (() => {})
     return () => {
       unsubscribe()
+      unsubscribeRequest()
     }
   }, [])
 
@@ -61,6 +88,12 @@ const ApiTesting = () => {
     }
   }, [environments])
 
+  useEffect(() => {
+    setRequest(requests[0] || {})
+  }, [requests])
+
+  console.log(requests, request, 'requests')
+
   return (
     <ApiTestingContext.Provider
       value={{
@@ -69,7 +102,10 @@ const ApiTesting = () => {
         environments,
         collections,
         selectedCollection,
-        setSelectedCollection
+        setSelectedCollection,
+        requests,
+        request,
+        setRequest
       }}
     >
       <ApiTestingHeader />

@@ -66,7 +66,15 @@ const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
 
         <div className="flex items-center gap-2">
           <TbLayoutSidebarRightCollapseFilled
-            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+            onClick={() => {
+              if (!isSidebarExpanded) {
+                setLocalActivePage(activePage)
+              } else {
+                setLocalActivePage('')
+              }
+
+              setIsSidebarExpanded(!isSidebarExpanded)
+            }}
             className="cursor-pointer"
             size={isSidebarExpanded ? 19 : 22}
             color={theme == 'light' ? 'black' : 'white'}
@@ -197,23 +205,26 @@ const SidebarApiTestingContent = () => {
   const [collections, setCollections] = useState([])
   const [selectedCollection, setSelectedCollection] = useState({})
   const typeRef = useRef('')
-  const handleApiTestingEvent = useCallback((event: any) => {
-    if (!event) return
-    switch (event.type) {
-      case ApiTestingEventType.UpdateCollection:
-        setCollections(event.payload)
-        break
-      case ApiTestingEventType.Message:
-        toast.success(event.payload)
-        break
-      default:
-        console.warn('Unknown network event type', event)
-    }
-  }, [])
+  const handleApiTestingEvent = useCallback(
+    (event: any) => {
+      if (!event) return
+      switch (event.type) {
+        case ApiTestingEventType.UpdateCollection:
+          setCollections(event.payload)
+
+          break
+        case ApiTestingEventType.Message:
+          toast.success(event.payload)
+          break
+        default:
+          console.warn('Unknown network event type', event)
+      }
+    },
+    [selectedCollection]
+  )
   useEffect(() => {
     const loadInitial = async () => {
       // environment
-
       const collectionData = await window.api.apiTesting.getCollections('')
       setCollections(collectionData)
     }
@@ -228,27 +239,41 @@ const SidebarApiTestingContent = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (collections?.length) {
+      const updatedSelectedCollection = {}
+      collections?.forEach((collection: any) => {
+        const id = convertId(collection?._id)
+        if (selectedCollection[id]) {
+          updatedSelectedCollection[id] = collection
+        }
+      })
+      setSelectedCollection(updatedSelectedCollection)
+    }
+  }, [collections])
+
   const handleAdd = async (e, item, id) => {
     e.stopPropagation()
     const requestPayload = {
       id: Date.now(),
       method: 'GET',
       title: '',
-      url: '',
-      headers: {}
+      url: ''
     }
     const docs = [...item?.docs, requestPayload]
     const updatedItem = { ...item, docs }
     try {
       await window.api.apiTesting.updateCollection({
         id,
-        payload: updatedItem
+        payload: { ...updatedItem, isDocs: true }
       })
       setSelectedCollection({ ...selectedCollection, [id]: updatedItem })
     } catch (error) {
       setSelectedCollection({ ...selectedCollection, [id]: item })
     }
   }
+
+  console.log(selectedCollection, 'selectedCollection')
 
   return (
     <div className="flex flex-col px-5! py-4! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
@@ -338,7 +363,7 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }:
     const updatedCollection = { ...selectedCollections, docs: filterDocs }
     await window.api.apiTesting.updateCollection({
       id,
-      payload: updatedCollection
+      payload: { ...updatedCollection, isDocs: true }
     })
     setSelectedCollection({ ...selectedCollections, [id]: updatedCollection })
   }
@@ -347,10 +372,28 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }:
       {docs.map((item, index) => {
         return (
           <p
+            onClick={() => {
+              window.api.request.setRequest({ ...item, collectionId: id })
+            }}
             key={item?.id || index}
-            className="text-[13px] uppercase flex items-center justify-between p-2! py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer"
+            className="text-[13px] uppercase flex items-center justify-between p-2! py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer!"
           >
-            <span>{item?.method}</span>
+            <span
+              className={`truncate ${
+                item?.method === 'GET'
+                  ? 'text-green-600'
+                  : item?.method === 'POST'
+                    ? 'text-orange-500 '
+                    : item?.method === 'PUT'
+                      ? 'text-blue-600 '
+                      : item?.method === 'DELETE'
+                        ? 'text-red-600 '
+                        : 'text-gray-700 '
+              }`}
+            >
+              {item?.method}{' '}
+              <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">{item?.url}</span>
+            </span>
             <span
               onClick={async (e) => {
                 handleDelete(e, item)

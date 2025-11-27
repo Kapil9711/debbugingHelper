@@ -22,19 +22,24 @@ export function registorRequestHandler() {
       body: request?.body || '',
       method: request?.method || '',
       headers: request?.headers || {},
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      id: request?.id || '',
+      collectionId: request?.collectionId || ''
     }
-    const isExist = await RequestModel.findOne({ url: payload?.url, method: payload?.method })
+    const isExist = await RequestModel.findOne({
+      url: payload?.url,
+      method: payload?.method,
+      id: payload?.id
+    })
     if (isExist) {
-      await RequestModel.findOneAndUpdate(
-        { url: payload?.url, method: payload?.method },
+      const objectId = new ObjectId(isExist?._id)
+      await RequestModel.findOneAndReplace(
+        { url: payload?.url, method: payload?.method, id: payload?.id },
         {
-          $set: {
-            body: payload?.body,
-            headers: payload?.headers,
-            response: null,
-            createdAt: Date.now()
-          }
+          ...isExist,
+          ...request,
+          createdAt: Date.now(),
+          _id: objectId
         }
       )
     } else {

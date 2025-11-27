@@ -92,7 +92,7 @@ export function registorApiTestingHandler() {
     const updatedDoc = {
       ...exist,
       ...payload,
-      createdAt: Date.now(),
+      // createdAt: Date.now(),
       _id: objectId
     }
     await ApiTestingModel.replaceOne({ _id: objectId }, updatedDoc)
@@ -160,12 +160,22 @@ export function registorApiTestingHandler() {
     const ApiTestingModel = db.collection('apiTestingColl')
     const objectId = new ObjectId(id)
     const exist = await ApiTestingModel.findOne({ _id: objectId })
-    const updatedDoc = {
-      ...exist,
-      ...payload,
-      createdAt: Date.now(),
-      _id: objectId
+    let updatedDoc = {}
+    if (!payload?.isDocs) {
+      updatedDoc = {
+        ...exist,
+        ...payload,
+        createdAt: Date.now(),
+        _id: objectId
+      }
+    } else {
+      updatedDoc = {
+        ...exist,
+        ...payload,
+        _id: objectId
+      }
     }
+
     await ApiTestingModel.replaceOne({ _id: objectId }, updatedDoc)
     const allDocs = await ApiTestingModel.find({}).sort({ createdAt: -1 }).toArray()
     broadcast(Channels.events.apiTestingUpdated, {

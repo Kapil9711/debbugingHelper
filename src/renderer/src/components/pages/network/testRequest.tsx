@@ -925,7 +925,7 @@ function RequestEditor({
   )
 }
 
-function safeParseJSON(str) {
+export function safeParseJSON(str) {
   if (typeof str !== 'string') return str
 
   try {
@@ -935,7 +935,7 @@ function safeParseJSON(str) {
   }
 }
 
-function isSafeToParse(str) {
+export function isSafeToParse(str) {
   if (typeof str !== 'string') return true
 
   try {
