@@ -1,102 +1,83 @@
-import React, { useEffect, useRef, useState, ReactNode } from 'react'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-interface Props {
-  trigger: ReactNode
-  children: ReactNode
+interface GlassDropdownProps {
+  trigger: React.ReactNode
+  children: React.ReactNode
   align?: 'left' | 'right'
 }
 
-export default function GlassDropdown({ trigger, children, align = 'left' }: Props) {
+export default function GlassDropdown({ trigger, children, align = 'left' }: GlassDropdownProps) {
   const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLDivElement | null>(null)
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [coords, setCoords] = useState({ top: 0, left: 0 })
 
-  // Create portal mounting point
-  const portal = useRef(document.getElementById('dropdown-portal'))
-  if (!portal.current) {
-    const div = document.createElement('div')
-    div.id = 'dropdown-portal'
-    document.body.appendChild(div)
-    portal.current = div
-  }
-
-  // Position dropdown under trigger
-  const updatePosition = () => {
-    const rect = triggerRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const left = align === 'left' ? rect.left : rect.right - (panelRef.current?.offsetWidth || 200)
-
-    setPos({
-      top: rect.bottom + 6,
-      left
-    })
-  }
-
-  // Recalculate position when opened or resized
-  useEffect(() => {
-    if (open) {
-      updatePosition()
-      window.addEventListener('resize', updatePosition)
-      window.addEventListener('scroll', updatePosition, true)
-    }
-    return () => {
-      window.removeEventListener('resize', updatePosition)
-      window.removeEventListener('scroll', updatePosition, true)
-    }
-  }, [open])
-
-  // Close on outside click
+  // ---- Close on outside click ----
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (
-        !triggerRef.current?.contains(e.target as Node) &&
-        !panelRef.current?.contains(e.target as Node)
+        menuRef.current &&
+        triggerRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        !triggerRef.current.contains(e.target as Node)
       ) {
         setOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClick)
+
+    if (open) document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
+  }, [open])
+
+  const openMenu = () => {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    setCoords({
+      top: rect.bottom + 6,
+      left: align === 'left' ? rect.left : rect.right
+    })
+
+    setOpen(true)
+  }
 
   return (
     <>
       {/* Trigger */}
-      <div ref={triggerRef} className="cursor-pointer inline-block" onClick={() => setOpen(!open)}>
+      <div
+        ref={triggerRef}
+        onClick={(e) => {
+          e.stopPropagation()
+          openMenu()
+        }}
+        className="inline-block w-fit"
+      >
         {trigger}
       </div>
 
-      {/* Dropdown Panel in Portal */}
+      {/* Portal */}
       {open &&
-        portal.current &&
         createPortal(
           <div
-            ref={panelRef}
-            style={{
-              position: 'absolute',
-              top: pos.top,
-              left: pos.left,
-              zIndex: 9999
+            ref={menuRef}
+            onClick={() => {
+              setOpen(false)
             }}
+            style={{
+              position: 'fixed',
+              top: coords.top,
+              left: align === 'left' ? coords.left : undefined,
+              right: align === 'right' ? window.innerWidth - coords.left : undefined,
+              zIndex: 999999
+            }}
+            className="p-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-xl min-w-[180px]"
           >
-            <div
-              className="
-                rounded-xl 
-                p-3 
-                shadow-xl 
-                border border-white/10 
-                bg-white/20 
-                backdrop-blur-xl 
-                text-white
-              "
-            >
-              {children}
-            </div>
+            {children}
           </div>,
-          portal.current
+          document.body
         )}
     </>
   )

@@ -254,7 +254,6 @@ const SidebarApiTestingContent = () => {
   }, [collections])
 
   const handleAdd = async (e, item, id) => {
-    e.stopPropagation()
     const requestPayload = {
       id: Date.now(),
       method: 'GET',
@@ -274,7 +273,7 @@ const SidebarApiTestingContent = () => {
     }
   }
 
-  console.log(selectedCollection, 'selectedCollection')
+  const editCollection = useRef({} as any)
 
   return (
     <div className="flex flex-col px-5! py-4! gap-4 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
@@ -318,42 +317,52 @@ const SidebarApiTestingContent = () => {
                 >
                   <span
                     onClick={async (e) => {
+                      e.stopPropagation()
                       handleAdd(e, item, id)
                     }}
                     className="p-[5px]! rounded-sm hover:bg-[#393939]"
                   >
                     <FaPlus />
                   </span>
-                  {/* <GlassDropdown
+                  <GlassDropdown
                     trigger={
-                      <span className="p-[5px]!  rounded-sm hover:bg-[#393939]">
+                      <span className="p-[5px]! block   rounded-sm hover:bg-[#393939] relative">
                         <TbDots />
                       </span>
                     }
-                    align="right"
                   >
-                    <div className="w-64">
-                      <div className="text-sm font-semibold mb-2">Dropdown Menu</div>
-                      <button className="w-full text-left px-3 py-2 rounded hover:bg-white/10">
-                        Profile
-                      </button>
-                      <button className="w-full text-left px-3 py-2 rounded hover:bg-white/10">
-                        Billing
-                      </button>
-                      <div className="border-t border-white/10 my-2" />
-                      <div className="text-xs text-gray-400 px-3">
-                        Some footer text or controls here
-                      </div>
+                    <div className="w-fit px-3! py-2! flex flex-col gap-0.5">
+                      <p className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase">
+                        New Folder
+                      </p>
+                      <p
+                        onClick={async (e) => {
+                          handleAdd(e, item, id)
+                        }}
+                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                      >
+                        New Request
+                      </p>
+                      <p
+                        onClick={() => {
+                          window.api.apiTesting.deleteCollection(id)
+                        }}
+                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                      >
+                        Delete
+                      </p>
+                      <p
+                        onClick={() => {
+                          editCollection.current = item
+                          typeRef.current = 'Edit'
+                          setIsOpen(true)
+                        }}
+                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                      >
+                        Rename
+                      </p>
                     </div>
-                  </GlassDropdown> */}
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation()
-                    }}
-                    className="p-[5px]!  rounded-sm hover:bg-[#393939]"
-                  >
-                    <TbDots />
-                  </span>
+                  </GlassDropdown>
                 </div>
               </p>
               {collection && (
@@ -369,11 +378,17 @@ const SidebarApiTestingContent = () => {
       </div>
 
       <GlassBlurModal isOpen={isOpen} onClose={() => setIsOpen(false)} maxWidth="max-w-md">
-        <AddEditModal
+        <AddEditTitleModal
           setIsOpen={setIsOpen}
+          onAdd={(title) => {
+            window.api.apiTesting.setCollection({ title })
+          }}
+          onEdit={(id, payload) => {
+            window.api.apiTesting.updateCollection({ id, payload })
+          }}
           type={typeRef.current}
-          initalTitle={typeRef.current == 'Add' ? '' : ''}
-          selectedData={{}}
+          initalTitle={typeRef.current == 'Add' ? '' : editCollection?.current?.title}
+          selectedData={typeRef.current == 'Add' ? {} : editCollection?.current}
         />
       </GlassBlurModal>
     </div>
@@ -441,7 +456,44 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }:
   )
 }
 
-const AddEditModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
+const AddEditTitleModal = ({ type, initalTitle, selectedData, setIsOpen, onAdd, onEdit }) => {
+  const [title, setTitle] = useState(initalTitle)
+  return (
+    <div className="flex items-center justify-center flex-col gap-5 py-3!">
+      <p className="text-center text-[#b5b5b5] text-sm ">{type} Collection</p>
+      <div className="flex  gap-2">
+        <input
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+          }}
+          placeholder="Enter Title"
+          type="text"
+          className="bg-[#232323] px-3! py-1! text-sm rounded-md outline-none border border-[#3b3a3a]"
+        />
+        <button
+          onClick={() => {
+            if (type == 'Add') {
+              onAdd(title)
+              setIsOpen(false)
+            }
+            if (type == 'Edit') {
+              const id = convertId(selectedData?._id)
+              const payload = { ...selectedData, title }
+              onEdit(id, payload)
+              setIsOpen(false)
+            }
+          }}
+          className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2 max-w-[50%] mx-auto!"
+        >
+          {type == 'Add' ? 'Create' : 'Submit'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+const AddEditFolderModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
   const [title, setTitle] = useState(initalTitle)
   return (
     <div className="flex items-center justify-center flex-col gap-5 py-3!">
