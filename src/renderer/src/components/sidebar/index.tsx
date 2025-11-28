@@ -15,6 +15,7 @@ import { convertId } from '@renderer/utlis/dbHelper'
 import { ApiTestingEventType } from '@shared/eventType'
 import toast from 'react-hot-toast'
 import { FaAngleDown, FaPlus } from 'react-icons/fa'
+import GlassDropdown from '../glassDropDown'
 
 const SideBar = () => {
   const { isSidebarExpanded, activePage } = useThemeContext() || {}
@@ -309,7 +310,12 @@ const SidebarApiTestingContent = () => {
                 className="text-sm uppercase text-gray-300 cursor-pointer p-1.5! px-2! rounded-md hover:bg-[#191919] flex items-center justify-between select-none"
               >
                 <span>{item?.title}</span>
-                <div className="flex items-center gap-2">
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation()
+                  }}
+                  className="flex items-center gap-2"
+                >
                   <span
                     onClick={async (e) => {
                       handleAdd(e, item, id)
@@ -318,6 +324,28 @@ const SidebarApiTestingContent = () => {
                   >
                     <FaPlus />
                   </span>
+                  {/* <GlassDropdown
+                    trigger={
+                      <span className="p-[5px]!  rounded-sm hover:bg-[#393939]">
+                        <TbDots />
+                      </span>
+                    }
+                    align="right"
+                  >
+                    <div className="w-64">
+                      <div className="text-sm font-semibold mb-2">Dropdown Menu</div>
+                      <button className="w-full text-left px-3 py-2 rounded hover:bg-white/10">
+                        Profile
+                      </button>
+                      <button className="w-full text-left px-3 py-2 rounded hover:bg-white/10">
+                        Billing
+                      </button>
+                      <div className="border-t border-white/10 my-2" />
+                      <div className="text-xs text-gray-400 px-3">
+                        Some footer text or controls here
+                      </div>
+                    </div>
+                  </GlassDropdown> */}
                   <span
                     onClick={(e) => {
                       e.stopPropagation()
