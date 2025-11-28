@@ -394,7 +394,9 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }:
               }`}
             >
               {item?.method}{' '}
-              <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">{item?.url}</span>
+              <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">
+                {item?.title || item?.url}
+              </span>
             </span>
             <span
               onClick={async (e) => {

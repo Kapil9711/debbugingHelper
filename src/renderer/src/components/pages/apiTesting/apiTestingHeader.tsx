@@ -2,13 +2,15 @@ import Header from '@renderer/components/header'
 import { useApiTestingContext } from '@renderer/screen/apiTesting'
 import { FaEdit } from 'react-icons/fa'
 import { CiEdit } from 'react-icons/ci'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import GlassBlurModal from '@renderer/components/glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
-import { IoMdClose } from 'react-icons/io'
+import { IoMdAdd, IoMdClose } from 'react-icons/io'
+import { handleUpdateCollectionById } from '@renderer/utlis/collectionHelper'
 
 const ApiTestingHeader = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [titleInput, setTitleInput] = useState('')
   const {
     selectedEnvironment,
     setSelectedEnvironment,
@@ -33,6 +35,10 @@ const ApiTestingHeader = () => {
             ? 'text-red-600'
             : 'text-gray-700'
 
+  useEffect(() => {
+    setTitleInput(request?.title)
+  }, [request])
+
   return (
     <Header>
       <div className="h-full w-full border-b border-gray-400">
@@ -40,30 +46,6 @@ const ApiTestingHeader = () => {
           <RequestHeader requestData={requests} request={request} setRequest={setRequest} />
         </div>
         <div className="h-[55%]   w-full flex justify-between  items-center px-5!">
-          {/* <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setIsOpen(true)
-                typeRef.current = 'Add'
-              }}
-              className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer"
-            >
-              + Add
-            </button>
-
-            {selectedEnvironment?.title != '' && (
-              <button
-                onClick={() => {
-                  setIsOpen(true)
-                  typeRef.current = 'Edit'
-                }}
-                className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2"
-              >
-                <CiEdit /> Edit
-              </button>
-            )}
-          </div> */}
-
           <div className="w-[80%] flex items-center gap-1 relative ">
             <button
               className={` rounded-md px-2! h-[90%] text-sm cursor-pointer flex items-center gap-2 ${methodColor} absolute left-[2px]`}
@@ -71,48 +53,78 @@ const ApiTestingHeader = () => {
               {request?.method}
             </button>
             <input
-              value={request?.title || request?.url}
-              // onChange={(e) => {
-              //   const value = e.target.value
-              //   setInputValue(value)
-              //   const payload = {
-              //     ...request,
-              //     url: e.target.value
-              //   }
-              //   window.api.request.updateRequest({ id: id, payload })
-              //   handleUpdateCollection(e, 'url')
-              // }}
+              placeholder="Enter Title"
+              value={titleInput}
+              onChange={(e) => {
+                const value = e.target.value
+                setTitleInput(value)
+                const id = convertId(request._id)
+                const payload = {
+                  ...request,
+                  title: e.target.value
+                }
+                window.api.request.updateRequest({ id: id, payload })
+                handleUpdateCollectionById(request?.collectionId, request?.id, {
+                  title: e.target.value
+                })
+              }}
               type="text"
-              className="h-[30px] shadow-sm w-[65%] border-[.5px] border-[#3c3c3c] rounded-md px-3! outline-none text-sm pl-[65px]! bg-[#131313]"
+              className="h-[30px] shadow-sm w-[300px] border-[.5px] border-[#3c3c3c] rounded-md px-3! outline-none text-sm pl-[65px]! bg-[#131313]"
             />
           </div>
 
           <div className="flex items-center justify-center gap-5">
-            <select
-              value={selectedEnvironment?.title || 'No Environment'}
-              onChange={(e) => {
-                let titleValue = e.target.value
-                if (titleValue == 'No Environment') {
-                  titleValue = ''
-                }
+            <div className="relative">
+              <select
+                value={selectedEnvironment?.title || 'No Environment'}
+                onChange={(e) => {
+                  let titleValue = e.target.value
+                  if (titleValue == 'No Environment') {
+                    titleValue = ''
+                  }
 
-                console.log(e.target.value, 'selectedEnvironemnt')
-                const obj = environments.find((item) => item.title == titleValue)
-                if (obj) {
-                  console.log(obj, 'selectedEnvironemnt1')
-                  setSelectedEnvironment(obj)
-                }
-              }}
-              className={`px-3! py-1! rounded font-semibold text-sm shadow-sm cursor-pointer border outline-none `}
-            >
-              {environments?.map((environment) => {
-                let { type, title } = environment
-                title = title || 'No Environment'
-                if (type == 'global') return null
-                return <option value={title}>{title}</option>
-              })}
-            </select>
-            <button className="py-1! px-1! rounded-lg cursor-pointer  text-sm">
+                  console.log(e.target.value, 'selectedEnvironemnt')
+                  const obj = environments.find((item) => item.title == titleValue)
+                  if (obj) {
+                    console.log(obj, 'selectedEnvironemnt1')
+                    setSelectedEnvironment(obj)
+                  }
+                }}
+                className={`px-3! py-1.5! !min-w-[220px] rounded font-semibold text-sm shadow-sm cursor-pointer border outline-none `}
+              >
+                {environments?.map((environment) => {
+                  let { type, title } = environment
+                  title = title || 'No Environment'
+                  if (type == 'global') return null
+                  return <option value={title}>{title}</option>
+                })}
+              </select>
+              <div className="flex items-center gap-2 absolute right-6 top-1/2 -translate-y-1/2">
+                <button
+                  onClick={() => {
+                    setIsOpen(true)
+                    typeRef.current = 'Add'
+                  }}
+                  className=" p-[2px]! bg-[#303030] rounded-sm text-sm text-[#e8e8e8] cursor-pointer"
+                >
+                  <IoMdAdd />
+                </button>
+
+                {selectedEnvironment?.title != 'NO ENVIRONMENT' && (
+                  <button
+                    onClick={() => {
+                      setIsOpen(true)
+                      typeRef.current = 'Edit'
+                    }}
+                    className="p-[2px]! bg-[#252525] rounded-sm text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2"
+                  >
+                    <CiEdit />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <button className="py-[2px]! px-1! rounded-lg cursor-pointer  text-sm">
               <FaEdit size={15} />
             </button>
           </div>
@@ -163,6 +175,18 @@ const AddEditModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
         >
           {type == 'Add' ? 'Create' : 'Submit'}
         </button>
+        {type == 'Edit' && (
+          <button
+            onClick={() => {
+              const id = convertId(selectedData?._id)
+              window.api.apiTesting.deleteEnvironment(id)
+              setIsOpen(false)
+            }}
+            className="bg-[#2d2d2d] hover:text-red-400 px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2 max-w-[50%] mx-auto!"
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   )
@@ -205,7 +229,7 @@ const RequestHeader = ({ requestData, request, setRequest }: any) => {
             className={`w-[140px] relative cursor-pointer select-none hover:bg-[var(--rev-bg-header)] hover:text-[var(--rev-text)] h-[30px] border p-1! px-2! rounded-md  ${isSelectedItem ? 'bg-[var(--rev-bg-header)]  text-[var(--rev-text)]' : 'text-[var(--text)]'} flex items-center  gap-1`}
           >
             <p className="text-sm leading-[1.2]">{item?.method}</p>
-            <p className="text-xs truncate">{path}</p>
+            <p className="text-xs truncate">{item?.title || path}</p>
 
             {(isHoveredItem || isSelectedItem) && (
               <>

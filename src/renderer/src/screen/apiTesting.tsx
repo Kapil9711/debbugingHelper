@@ -57,7 +57,8 @@ const ApiTesting = () => {
       const requestArr = await window.api.request.getRequest('')
       setRequests(requestArr)
       setRequest(requestArr[0] || {})
-      setEnvironments(environmentData)
+      const environmentFilterData = environmentData?.filter((item) => item?.type != 'global')
+      setEnvironments(environmentFilterData)
       setCollections(collectionData)
     }
     loadInitial()
@@ -92,7 +93,7 @@ const ApiTesting = () => {
     setRequest(requests[0] || {})
   }, [requests])
 
-  console.log(requests, request, 'requests')
+  console.log(environments, 'environements')
 
   return (
     <ApiTestingContext.Provider

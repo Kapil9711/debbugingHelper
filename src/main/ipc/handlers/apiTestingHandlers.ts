@@ -11,28 +11,33 @@ export function registorApiTestingHandler() {
     const db = getDb()
     const ApiTestingModel = db.collection('apiTestingEnv')
     // await ApiTestingModel.deleteMany({})
-    const isGlobalExist = await ApiTestingModel.findOne({ type: 'global', title: 'Global Env' })
-    const isLocalExist = await ApiTestingModel.findOne({ type: 'local', title: '' })
+    const isGlobalExist = await ApiTestingModel.findOne({ type: 'global' })
+    const isLocalExist = await ApiTestingModel.findOne({ type: 'local' })
     if (!isGlobalExist) {
-      const globalPayload = {
-        type: 'global',
-        title: 'Global Env',
-        variables: {},
-        createdAt: Date.now()
-      }
-      await ApiTestingModel.insertOne(globalPayload)
+      await ApiTestingModel.updateOne(
+        { type: 'global' },
+        {
+          $setOnInsert: {
+            title: 'GLOBAL ENV',
+            variables: {},
+            createdAt: Date.now()
+          }
+        },
+        { upsert: true }
+      )
     }
     if (!isLocalExist) {
-      const localPayload = {
-        type: 'local',
-        title: '',
-        variables: {},
-        createdAt: Date.now()
-      }
-      const isLocalExist = await ApiTestingModel.findOne({ type: 'local', title: '' })
-      if (!isLocalExist) {
-        await ApiTestingModel.insertOne(localPayload)
-      }
+      await ApiTestingModel.updateOne(
+        { type: 'local' },
+        {
+          $setOnInsert: {
+            title: 'NO ENVIRONMENT',
+            variables: {},
+            createdAt: Date.now()
+          }
+        },
+        { upsert: true }
+      )
     }
     const allDocs = await ApiTestingModel.find({}).sort({ createdAt: -1 }).toArray()
     return allDocs
@@ -41,15 +46,16 @@ export function registorApiTestingHandler() {
     const db = getDb()
     const ApiTestingModel = db.collection('apiTestingEnv')
 
-    if (!environment?.title) {
+    if (!environment?.title || String(environment?.title).toUpperCase() == 'NO ENVIRONMENT') {
       return broadcast(Channels.events.apiTestingUpdated, {
         type: ApiTestingEventType.Message,
         payload: 'Title is Required'
       })
     }
+    environment.title = String(environment?.title).toUpperCase()
     const payload = {
       type: environment?.type || 'local',
-      title: environment?.title,
+      title: environment.title,
       variables: {},
       createdAt: Date.now()
     }
@@ -88,6 +94,14 @@ export function registorApiTestingHandler() {
     const db = getDb()
     const ApiTestingModel = db.collection('apiTestingEnv')
     const objectId = new ObjectId(id)
+    if (!payload?.title || String(payload?.title).toUpperCase() == 'NO ENVIRONMENT') {
+      return broadcast(Channels.events.apiTestingUpdated, {
+        type: ApiTestingEventType.Message,
+        payload: 'Title is Required'
+      })
+    }
+    payload.title = String(payload?.title).toUpperCase()
+
     const exist = await ApiTestingModel.findOne({ _id: objectId })
     const updatedDoc = {
       ...exist,
@@ -119,6 +133,7 @@ export function registorApiTestingHandler() {
         payload: 'Title is Required'
       })
     }
+    collection.title = String(collection?.title)?.toUpperCase()
 
     const payload = {
       title: collection?.title,
@@ -158,6 +173,15 @@ export function registorApiTestingHandler() {
     const { id, payload } = data
     const db = getDb()
     const ApiTestingModel = db.collection('apiTestingColl')
+
+    if (!payload?.title) {
+      return broadcast(Channels.events.apiTestingUpdated, {
+        type: ApiTestingEventType.Message,
+        payload: 'Title is Required'
+      })
+    }
+    payload.title = String(payload?.title)?.toUpperCase()
+
     const objectId = new ObjectId(id)
     const exist = await ApiTestingModel.findOne({ _id: objectId })
     let updatedDoc = {}
