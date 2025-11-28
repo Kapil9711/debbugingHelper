@@ -16,7 +16,7 @@ export function registorRequestHandler() {
     const db = getDb()
     const RequestModel = db.collection('requests')
     // await RequestModel.deleteMany({})
-    const payload = {
+    const payload: any = {
       type: request?.type || '',
       url: request?.url || '',
       body: request?.body || '',
@@ -33,16 +33,22 @@ export function registorRequestHandler() {
     })
     if (isExist) {
       const objectId = new ObjectId(isExist?._id)
+      const finalUpdate = {
+        ...isExist,
+        ...request,
+        createdAt: Date.now(),
+        _id: objectId
+      }
+      console.log(finalUpdate, 'finalupdate')
+
       await RequestModel.findOneAndReplace(
-        { url: payload?.url, method: payload?.method, id: payload?.id },
-        {
-          ...isExist,
-          ...request,
-          createdAt: Date.now(),
-          _id: objectId
-        }
+        { url: payload?.url, method: payload?.method, id: request?.id },
+        finalUpdate
       )
     } else {
+      if (request?.response) {
+        payload.response = request?.response
+      }
       await RequestModel.insertOne(payload)
     }
 

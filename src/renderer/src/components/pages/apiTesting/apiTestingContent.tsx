@@ -35,6 +35,12 @@ const SearchHeader = () => {
     setInputValue(request?.url || '')
   }, [request])
 
+  let id = ''
+  let collectionId = request?.collectionId
+  if (request?._id) {
+    id = convertId(request?._id)
+  }
+
   async function runTest() {
     try {
       setRequestLoading(true)
@@ -52,6 +58,7 @@ const SearchHeader = () => {
         method: inputMethod,
         response: res
       }
+      handleUpdateCollectionById(collectionId, request?.id, { response: res })
       window.api.request.updateRequest({ id: idString, payload })
     } catch (err: any) {
       toast.error(String(err?.message ?? err))
@@ -60,39 +67,7 @@ const SearchHeader = () => {
     }
   }
 
-  let id = ''
-  let collectionId = request?.collectionId
-  if (request?._id) {
-    id = convertId(request?._id)
-  }
-  let selectedCollection: any = null
-  if (collectionId) {
-    const obj = collections?.find((item: any) => {
-      const itemId = convertId(item?._id)
-      return itemId == collectionId
-    })
-    selectedCollection = obj
-  }
-
-  const handleUpdateCollection = (e: any, type: any) => {
-    if (selectedCollection) {
-      const { docs } = selectedCollection
-      const initialDco = docs?.find((item) => item?.id == request?.id)
-      if (initialDco) {
-        const filterDoc = docs?.filter((item) => item?.id != request?.id)
-        if (type == 'method') {
-          initialDco.method = e.target.value
-        }
-        if (type == 'url') {
-          initialDco.url = e.target.value
-        }
-        window.api.apiTesting.updateCollection({
-          id: collectionId,
-          payload: { ...selectedCollection, docs: [...filterDoc, initialDco] }
-        })
-      }
-    }
-  }
+  console.log(request, 'selectedRequest')
 
   const methodColor =
     inputMethod === 'GET'
@@ -116,7 +91,8 @@ const SearchHeader = () => {
             method: e.target.value
           }
           window.api.request.updateRequest({ id: id, payload })
-          handleUpdateCollection(e, 'method')
+          const updateValue: any = { method: e.target.value }
+          handleUpdateCollectionById(collectionId, request?.id, updateValue)
         }}
         className={`
     px-3! py-2! rounded font-semibold text-sm shadow-sm cursor-pointer outline-none
@@ -139,7 +115,8 @@ const SearchHeader = () => {
             url: e.target.value
           }
           window.api.request.updateRequest({ id: id, payload })
-          handleUpdateCollection(e, 'url')
+          const updateValue: any = { url: e.target.value }
+          handleUpdateCollectionById(collectionId, request?.id, updateValue)
         }}
         type="text"
         className="h-[38px] shadow-sm w-[65%] border border-gray-400 rounded-md px-3! outline-none text-sm"
@@ -246,6 +223,7 @@ import { isSafeToParse, safeParseJSON } from '../network/testRequest'
 import ReactJson from 'react-json-view'
 import { FaSpinner } from 'react-icons/fa'
 import TopBarLoader from '@renderer/components/topLoaderBar'
+import { handleUpdateCollectionById } from '@renderer/utlis/collectionHelper'
 
 function ResizableBottomPanel({
   initialHeight = 320,

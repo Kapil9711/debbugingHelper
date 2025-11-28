@@ -367,12 +367,14 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }:
     })
     setSelectedCollection({ ...selectedCollections, [id]: updatedCollection })
   }
+  console.log(docs, 'docs')
   return (
     <div key={id} className="pl-1.5!">
       {docs.map((item, index) => {
         return (
           <p
             onClick={() => {
+              console.log(item, 'item')
               window.api.request.setRequest({ ...item, collectionId: id })
             }}
             key={item?.id || index}
