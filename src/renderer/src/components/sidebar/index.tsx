@@ -4,7 +4,7 @@ import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
 import { TbDots, TbDotsVertical, TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
-import { IoIosSettings } from 'react-icons/io'
+import { IoIosFolderOpen, IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { GiNetworkBars } from 'react-icons/gi'
 import { GrRevert, GrTest } from 'react-icons/gr'
@@ -253,7 +253,7 @@ const SidebarApiTestingContent = () => {
     }
   }, [collections])
 
-  const handleAdd = async (e, item, id) => {
+  const handleAddRequest = async (e, item, id) => {
     const requestPayload = {
       id: Date.now(),
       method: 'GET',
@@ -270,6 +270,19 @@ const SidebarApiTestingContent = () => {
       setSelectedCollection({ ...selectedCollection, [id]: updatedItem })
     } catch (error) {
       setSelectedCollection({ ...selectedCollection, [id]: item })
+    }
+  }
+
+  const handleAddFolder = async (collection, rootId) => {
+    const { docs, _id } = collection || {}
+    const collectionId = convertId(_id)
+    if (collectionId == rootId) {
+      const folderPayload = { title: 'NEW FOLDER', docs: [], id: Date.now() }
+      const updatedDocs = [...docs, folderPayload]
+      await window.api.apiTesting.updateCollection({
+        id: collectionId,
+        payload: { ...collection, docs: updatedDocs, isDocs: true }
+      })
     }
   }
 
@@ -318,7 +331,7 @@ const SidebarApiTestingContent = () => {
                   <span
                     onClick={async (e) => {
                       e.stopPropagation()
-                      handleAdd(e, item, id)
+                      handleAddRequest(e, item, id)
                     }}
                     className="p-[5px]! rounded-sm hover:bg-[#393939]"
                   >
@@ -332,12 +345,17 @@ const SidebarApiTestingContent = () => {
                     }
                   >
                     <div className="w-fit px-3! py-2! flex flex-col gap-0.5">
-                      <p className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase">
+                      <p
+                        onClick={async (e) => {
+                          handleAddFolder(item, id)
+                        }}
+                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                      >
                         New Folder
                       </p>
                       <p
                         onClick={async (e) => {
-                          handleAdd(e, item, id)
+                          handleAddRequest(e, item, id)
                         }}
                         className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                       >
@@ -370,6 +388,7 @@ const SidebarApiTestingContent = () => {
                   key={collection?.docs?.length}
                   selectedCollections={collection}
                   setSelectedCollection={setSelectedCollection}
+                  level={0}
                 />
               )}
             </div>
@@ -395,64 +414,260 @@ const SidebarApiTestingContent = () => {
   )
 }
 
-const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection }: any) => {
+const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection, level }: any) => {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const collection = selectedCollections
+
   const { docs, _id } = selectedCollections
   const id = convertId(_id)
-  const handleDelete = async (e, item) => {
-    e.stopPropagation()
-    const filterDocs = docs?.filter((itm) => {
-      return itm?.id != item?.id
-    })
-    const updatedCollection = { ...selectedCollections, docs: filterDocs }
+  const handleDeleteDoc = async (targetId) => {
+    const removeNodeById = (nodes, targetId) => {
+      return nodes
+        .filter((node) => node.id !== targetId)
+        .map((node) => {
+          if (Array.isArray(node.docs) && node.docs.length > 0) {
+            return {
+              ...node,
+              docs: removeNodeById(node.docs, targetId)
+            }
+          }
+          return node
+        })
+    }
+    const updatedDocs = removeNodeById(collection?.docs, targetId)
+    const updatedCollection = { ...selectedCollections, docs: updatedDocs }
     await window.api.apiTesting.updateCollection({
       id,
       payload: { ...updatedCollection, isDocs: true }
     })
     setSelectedCollection({ ...selectedCollections, [id]: updatedCollection })
   }
-  console.log(docs, 'docs')
+
+  const handleAddRequest = async (folderId) => {
+    const requestPayload = {
+      id: Date.now(),
+      method: 'GET',
+      title: '',
+      url: ''
+    }
+    const addRequest = (nodes, targetId, requestPayload) => {
+      return nodes.map((node) => {
+        const { docs, id } = node
+        const isFolder = Array.isArray(docs)
+        if (isFolder) {
+          // if target folder found
+          if (id == targetId) {
+            return { ...node, docs: [...docs, requestPayload] }
+          }
+          return { ...node, docs: addRequest(docs, targetId, requestPayload) }
+          // if not found that do recursive
+        }
+        //  return unchanged if request
+        return node
+      })
+    }
+    const updatedDocs = addRequest(collection?.docs, folderId, requestPayload)
+    const updatedCollection = { ...collection, docs: updatedDocs }
+    try {
+      await window.api.apiTesting.updateCollection({
+        id,
+        payload: { ...updatedCollection, isDocs: true }
+      })
+      openFolder(folderId)
+    } catch (error) {
+      openFolder(folderId)
+    }
+  }
+
+  const handleAddFolder = async (rootId) => {
+    const { docs, _id } = collection || {}
+    const collectionId = convertId(_id)
+    if (collectionId == rootId) {
+      const folderPayload = { title: 'NEW FOLDER', docs: [], id: Date.now() }
+      const updatedDocs = [...docs, folderPayload]
+      await window.api.apiTesting.updateCollection({
+        id: collectionId,
+        payload: { ...collection, docs: updatedDocs, isDocs: true }
+      })
+    }
+  }
+
+  function toggleFolder(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+  const openFolder = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (!next.has(id)) next.add(id)
+      return next
+    })
+  }
+
+  console.log(selectedCollections, 'selectCol')
   return (
     <div key={id} className="pl-1.5!">
       {docs.map((item, index) => {
         return (
-          <p
-            onClick={() => {
-              console.log(item, 'item')
-              window.api.request.setRequest({ ...item, collectionId: id })
-            }}
-            key={item?.id || index}
-            className="text-[13px] uppercase flex items-center justify-between p-2! py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer!"
-          >
-            <span
-              className={`truncate ${
-                item?.method === 'GET'
-                  ? 'text-green-600'
-                  : item?.method === 'POST'
-                    ? 'text-orange-500 '
-                    : item?.method === 'PUT'
-                      ? 'text-blue-600 '
-                      : item?.method === 'DELETE'
-                        ? 'text-red-600 '
-                        : 'text-gray-700 '
-              }`}
-            >
-              {item?.method}{' '}
-              <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">
-                {item?.title || item?.url}
-              </span>
-            </span>
-            <span
-              onClick={async (e) => {
-                handleDelete(e, item)
-              }}
-              className="p-[5px]!  rounded-sm hover:bg-[#393939]"
-            >
-              <MdDelete className="" />
-            </span>
-          </p>
+          <RenderNodeItem
+            item={item}
+            level={0}
+            expandedIds={expandedIds}
+            toggleFolder={toggleFolder}
+            handleAddRequest={handleAddRequest}
+            handleDeleteDoc={handleDeleteDoc}
+          />
         )
       })}
     </div>
+  )
+}
+
+const RenderNodeItem = ({
+  item,
+  level,
+  expandedIds,
+  toggleFolder,
+  handleAddRequest,
+  handleDeleteDoc
+}) => {
+  const { docs, id } = item
+  const isFolder = Array.isArray(docs)
+  const folderId = isFolder ? id : ''
+  const paddingInline = 8 + level
+  if (folderId) {
+    const isOpen = expandedIds.has(folderId)
+    return (
+      <div key={folderId}>
+        <p
+          onClick={() => toggleFolder(folderId)}
+          className="text-sm uppercase text-gray-300 cursor-pointer p-[3px]! px-2! rounded-md hover:bg-[#191919] flex items-center justify-between select-none"
+        >
+          <span className={`truncate flex items-center gap-2`}>
+            <IoIosFolderOpen />
+            <span className="ml-2 uppercase text-[#9d9d9d] text-[11px]">{item?.title}</span>
+          </span>
+          <div
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+            className="flex items-center gap-2"
+          >
+            <span
+              onClick={async (e) => {
+                e.stopPropagation()
+                handleAddRequest(folderId)
+              }}
+              className="p-[5px]! rounded-sm hover:bg-[#393939]"
+            >
+              <FaPlus />
+            </span>
+            <GlassDropdown
+              trigger={
+                <span className="p-[5px]! block   rounded-sm hover:bg-[#393939] relative">
+                  <TbDots />
+                </span>
+              }
+            >
+              <div className="w-fit px-3! py-2! flex flex-col gap-0.5">
+                <p
+                  onClick={async (e) => {
+                    // handleAddFolder(item, id)
+                  }}
+                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                >
+                  New Folder
+                </p>
+                <p
+                  onClick={async () => {
+                    handleAddRequest(folderId)
+                  }}
+                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                >
+                  New Request
+                </p>
+                <p
+                  onClick={() => {
+                    handleDeleteDoc(id)
+                  }}
+                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                >
+                  Delete
+                </p>
+                <p
+                  onClick={() => {
+                    // editCollection.current = item
+                    // typeRef.current = 'Edit'
+                    // setIsOpen(true)
+                  }}
+                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
+                >
+                  Rename
+                </p>
+              </div>
+            </GlassDropdown>
+          </div>
+        </p>
+
+        {isOpen &&
+          docs?.map((item) => {
+            return (
+              <RenderNodeItem
+                handleAddRequest={handleAddRequest}
+                item={item}
+                level={level + 1}
+                expandedIds={expandedIds}
+                toggleFolder={toggleFolder}
+                handleDeleteDoc={handleDeleteDoc}
+              />
+            )
+          })}
+      </div>
+    )
+  }
+  return (
+    <>
+      <p
+        style={{ paddingInline: paddingInline }}
+        onClick={() => {
+          // console.log(item, 'item')
+          // window.api.request.setRequest({ ...item, collectionId: id })
+        }}
+        key={id}
+        className="text-[13px] uppercase flex items-center justify-between  py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer! select-none"
+      >
+        <span
+          className={`truncate text-[12px] ${
+            item?.method === 'GET'
+              ? 'text-green-600'
+              : item?.method === 'POST'
+                ? 'text-orange-500 '
+                : item?.method === 'PUT'
+                  ? 'text-blue-600 '
+                  : item?.method === 'DELETE'
+                    ? 'text-red-600 '
+                    : 'text-gray-700 '
+          }`}
+        >
+          {item?.method}{' '}
+          <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">
+            {item?.title || item?.url}
+          </span>
+        </span>
+        <span
+          onClick={async () => {
+            handleDeleteDoc(id)
+          }}
+          className="p-[3px]!  rounded-sm hover:bg-[#393939]"
+        >
+          <MdDelete className="" />
+        </span>
+      </p>
+    </>
   )
 }
 
