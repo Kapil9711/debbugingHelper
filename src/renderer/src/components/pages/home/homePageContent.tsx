@@ -1,10 +1,12 @@
 import { useHomePageContext } from '@renderer/screen/homePage'
+import { clearExistingHighlights, highlightMatches } from '@renderer/utlis/jsonHelper'
+
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 
 const HomePageContent = () => {
-  const { logs, filter, setFilter } = useHomePageContext()
+  const { logs } = useHomePageContext()
   const [filterLogs, setFilterLogs] = useState(logs)
   const handleCopy = async (textToCopy) => {
     await navigator.clipboard.writeText(textToCopy)
@@ -54,43 +56,126 @@ const HomePageContent = () => {
   useEffect(() => {
     handleFilter(filterRef?.current)
   }, [logs])
+
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const matchIndexRef = useRef(0)
+
+  const handleSearchHighlight = () => {
+    const container = containerRef.current
+    if (!container) return
+    // get ALL react-json-view roots
+    const roots = container.querySelectorAll('.react-json-view')
+    if (!roots.length) return
+
+    roots.forEach((root) => {
+      // 1) remove old marks
+      clearExistingHighlights(root)
+      // 2) add new ones
+      if (filterRef?.current.trim()) {
+        highlightMatches(root, filterRef?.current.trim())
+      }
+    })
+  }
+  function scrollToFirstMatch(next = true) {
+    const container = containerRef.current
+    if (!container) return
+
+    const marks = Array.from(container.querySelectorAll('mark.json-highlight')) as HTMLElement[]
+    if (marks.length === 0) return
+
+    // update index
+    if (next) {
+      matchIndexRef.current = (matchIndexRef.current + 1) % marks.length
+    } else {
+      matchIndexRef.current = (matchIndexRef.current - 1 + marks.length) % marks.length
+    }
+
+    const target = marks[matchIndexRef.current]
+    const markRect = target.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    const offsetInside = markRect.top - containerRect.top
+
+    const offset = 150 // space from top
+    container.scrollTo({
+      top: container.scrollTop + offsetInside - offset,
+      behavior: 'smooth'
+    })
+
+    // blink effect
+    target.classList.add('blink-highlight')
+    setTimeout(() => target.classList.remove('blink-highlight'), 1000)
+  }
+
+  // useEffect(() => {
+  //   const container = containerRef.current
+  //   if (!container) return
+
+  //   const roots = container.querySelectorAll('.react-json-view')
+  //   if (!roots.length) return
+
+  //   roots.forEach((root) => {
+  //     // 1) remove old marks
+  //     clearExistingHighlights(root)
+  //     // 2) add new ones
+  //     if (filter.trim()) {
+  //       highlightMatches(root, filter.trim())
+  //     }
+  //   })
+  // }, [filterRef?.current, filterLogs])
   return (
-    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative">
+    <div
+      ref={containerRef}
+      className=".logs-scroll flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative"
+    >
       <HomePageFilters
         count={filterLogs?.length}
         handleFilter={handleFilter}
         handleRemoveDuplicate={handleRemoveDuplicate}
         filterRef={filterRef}
         RemoveDublicateRef={RemoveDublicateRef}
-        filter={filter}
-        setFilter={setFilter}
+        handleSearchHighlight={handleSearchHighlight}
+        scrollToFirstMatch={scrollToFirstMatch}
+        matchIndexRef={matchIndexRef}
       />
       <DataList
         logs={filterLogs}
         setIsHovered={setIsHovered}
         isHovered={isHovered}
         handleCopy={handleCopy}
+        handleSearchHighlight={handleSearchHighlight}
       />
     </div>
   )
 }
 
-const HomePageFilters = ({ handleFilter, count, filterRef, filter, setFilter }: any) => {
-  useEffect(() => {
-    handleFilter(filter)
-    filterRef.current = filter
-    // window.api.console.setSearchString(filter)
-  }, [filter])
+const HomePageFilters = ({
+  handleFilter,
+  count,
+  filterRef,
+  handleSearchHighlight,
+  scrollToFirstMatch,
+  matchIndexRef
+}: any) => {
   return (
     <div className="fixed! top-[100px]! right-5!  w-[15%] mobile:hidden tabletS:hidden">
       <p className="text-sm mb-1! text-white">Found ({count})</p>
-      <input
+      <SearchInput
+        handleFilter={handleFilter}
+        filterRef={filterRef}
+        handleSearchHighlight={handleSearchHighlight}
+        scrollToFirstMatch={scrollToFirstMatch}
+        matchIndexRef={matchIndexRef}
+      />
+      {/* <input
         onBlur={() => {
+          filterRef.current = filter
           handleFilter(filter)
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
+            filterRef.current = filter
             handleFilter(filter)
+            handleSearchHighlight()
           }
         }}
         placeholder="Search"
@@ -101,7 +186,7 @@ const HomePageFilters = ({ handleFilter, count, filterRef, filter, setFilter }: 
           setFilter(e.target.value)
           window.api.console.setSearchString(e.target.value)
         }}
-      />
+      /> */}
       {/* <div className="flex items-center gap-2 mt-2!">
         <p className="text-sm text-white">Remove Duplicate</p>
         <input
@@ -119,12 +204,56 @@ const HomePageFilters = ({ handleFilter, count, filterRef, filter, setFilter }: 
   )
 }
 
-const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
+const SearchInput = ({
+  handleFilter,
+  filterRef,
+  handleSearchHighlight,
+  scrollToFirstMatch,
+  matchIndexRef
+}) => {
+  const [filter, setFilter] = useState('')
+  useEffect(() => {
+    handleFilter(filter)
+    filterRef.current = filter
+    handleSearchHighlight()
+    matchIndexRef.current = -1
+  }, [filter])
+  return (
+    <input
+      onBlur={() => {
+        filterRef.current = filter
+        handleFilter(filter)
+        handleSearchHighlight(filter)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          filterRef.current = filter
+          handleFilter(filter)
+          handleSearchHighlight(filter)
+          scrollToFirstMatch()
+        }
+      }}
+      placeholder="Search"
+      className="px-3! bg-gray-300 text-gray-900 text-sm font-bold h-8 w-full rounded-md"
+      type="text"
+      value={filter}
+      onChange={(e) => {
+        setFilter(e.target.value)
+        window.api.console.setSearchString(e.target.value)
+      }}
+    />
+  )
+}
+
+const DataList = ({ logs, setIsHovered, isHovered, handleCopy, handleSearchHighlight }) => {
   return (
     <>
       {logs.map((item: any, index: any) => {
         return (
           <div
+            onClick={() => {
+              setTimeout(handleSearchHighlight, 1000)
+            }}
             onMouseEnter={() => setIsHovered(index)}
             onMouseLeave={() => setIsHovered('')}
             key={index}

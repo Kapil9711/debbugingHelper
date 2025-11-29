@@ -62,3 +62,11 @@ body {
 .ͼ4y {
   background-color: transparent !important;
 }
+
+.json-highlight {
+  background: yellow;
+  color: black;
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 0 2px;
+}
