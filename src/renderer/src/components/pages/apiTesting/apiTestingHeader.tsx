@@ -2,11 +2,11 @@ import Header from '@renderer/components/header'
 import { useApiTestingContext } from '@renderer/screen/apiTesting'
 import { FaEdit } from 'react-icons/fa'
 import { CiEdit } from 'react-icons/ci'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import GlassBlurModal from '@renderer/components/glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
 import { IoMdAdd, IoMdClose } from 'react-icons/io'
-import { handleUpdateCollectionById } from '@renderer/utlis/collectionHelper'
+import { handleUpdateCollectionById, updateCollectionById } from '@renderer/utlis/collectionHelper'
 
 const ApiTestingHeader = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -39,6 +39,11 @@ const ApiTestingHeader = () => {
     setTitleInput(request?.title)
   }, [request])
 
+  const handleUpdatedCollection = useCallback(
+    updateCollectionById.bind(null, request?.collectionId),
+    [request]
+  )
+
   return (
     <Header>
       <div className="h-full w-full border-b border-gray-400">
@@ -64,9 +69,12 @@ const ApiTestingHeader = () => {
                   title: e.target.value
                 }
                 window.api.request.updateRequest({ id: id, payload })
-                handleUpdateCollectionById(request?.collectionId, request?.id, {
+                handleUpdatedCollection(request?.id, {
                   title: e.target.value
                 })
+                // handleUpdateCollectionById(request?.collectionId, request?.id, {
+                //   title: e.target.value
+                // })
               }}
               type="text"
               className="h-[30px] shadow-sm w-[300px] border-[.5px] border-[#3c3c3c] rounded-md px-3! outline-none text-sm pl-[65px]! bg-[#131313]"
@@ -83,10 +91,8 @@ const ApiTestingHeader = () => {
                     titleValue = ''
                   }
 
-                  console.log(e.target.value, 'selectedEnvironemnt')
                   const obj = environments.find((item) => item.title == titleValue)
                   if (obj) {
-                    console.log(obj, 'selectedEnvironemnt1')
                     setSelectedEnvironment(obj)
                   }
                 }}

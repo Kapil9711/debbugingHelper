@@ -58,7 +58,7 @@ const SearchHeader = () => {
         method: inputMethod,
         response: res
       }
-      handleUpdateCollectionById(collectionId, request?.id, { response: res })
+      handleUpdatedCollection(request?.id, { response: res })
       window.api.request.updateRequest({ id: idString, payload })
     } catch (err: any) {
       toast.error(String(err?.message ?? err))
@@ -67,7 +67,10 @@ const SearchHeader = () => {
     }
   }
 
-  console.log(request, 'selectedRequest')
+  const handleUpdatedCollection = useCallback(
+    updateCollectionById.bind(null, request?.collectionId),
+    [request]
+  )
 
   const methodColor =
     inputMethod === 'GET'
@@ -92,7 +95,7 @@ const SearchHeader = () => {
           }
           window.api.request.updateRequest({ id: id, payload })
           const updateValue: any = { method: e.target.value }
-          handleUpdateCollectionById(collectionId, request?.id, updateValue)
+          handleUpdatedCollection(request?.id, updateValue)
         }}
         className={`
     px-3! py-2! rounded font-semibold text-sm shadow-sm cursor-pointer outline-none
@@ -116,7 +119,7 @@ const SearchHeader = () => {
           }
           window.api.request.updateRequest({ id: id, payload })
           const updateValue: any = { url: e.target.value }
-          handleUpdateCollectionById(collectionId, request?.id, updateValue)
+          handleUpdatedCollection(request?.id, updateValue)
         }}
         type="text"
         className="h-[38px] shadow-sm w-[65%] border border-gray-400 rounded-md px-3! outline-none text-sm"
@@ -223,7 +226,7 @@ import { isSafeToParse, safeParseJSON } from '../network/testRequest'
 import ReactJson from 'react-json-view'
 import { FaSpinner } from 'react-icons/fa'
 import TopBarLoader from '@renderer/components/topLoaderBar'
-import { handleUpdateCollectionById } from '@renderer/utlis/collectionHelper'
+import { handleUpdateCollectionById, updateCollectionById } from '@renderer/utlis/collectionHelper'
 
 function ResizableBottomPanel({
   initialHeight = 320,
