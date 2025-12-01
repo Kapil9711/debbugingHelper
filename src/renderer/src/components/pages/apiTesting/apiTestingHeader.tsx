@@ -1,12 +1,13 @@
 import Header from '@renderer/components/header'
 import { useApiTestingContext } from '@renderer/screen/apiTesting'
-import { FaEdit } from 'react-icons/fa'
+import { FaEdit, FaPlus } from 'react-icons/fa'
 import { CiEdit } from 'react-icons/ci'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import GlassBlurModal from '@renderer/components/glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
 import { IoMdAdd, IoMdClose } from 'react-icons/io'
 import { handleUpdateCollectionById, updateCollectionById } from '@renderer/utlis/collectionHelper'
+import SaveCollectionPopUp from '@renderer/components/saveCollectionPopUp'
 
 const ApiTestingHeader = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -200,14 +201,32 @@ const AddEditModal = ({ type, initalTitle, selectedData, setIsOpen }) => {
 
 const RequestHeader = ({ requestData, request, setRequest }: any) => {
   const [hoveredId, setHoveredId] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
+  const [selectedRequest, setSelectedRequest] = useState({} as any)
 
   // console.log(requestData, request, 'requests')
-
   return (
     <div className=" h-full w-full flex items-center px-6! gap-4 overflow-auto scrollbar-hidden">
+      <span
+        onClick={async (e) => {
+          e.stopPropagation()
+          const payload = {
+            method: 'GET',
+            url: '',
+            headers: {},
+            title: 'new request',
+            id: Date.now()
+          }
+          window.api.request.setRequest(payload)
+        }}
+        className="p-[5px]! rounded-sm bg-[#393939] cursor-pointer"
+      >
+        <FaPlus />
+      </span>
       {requestData?.map((item: any) => {
         const itemId = convertId(item?._id)
         const dataId = convertId(request?._id)
+        const collectionId = item?.collectionId
         const isSelectedItem = itemId === dataId
         const isHoveredItem = hoveredId == convertId(item?._id)
         const url = item?.url
@@ -240,8 +259,15 @@ const RequestHeader = ({ requestData, request, setRequest }: any) => {
             {(isHoveredItem || isSelectedItem) && (
               <>
                 <p
-                  onClick={async () => {
-                    await window.api.request.deleteRequest(itemId)
+                  onClick={async (e) => {
+                    if (collectionId) {
+                      e.stopPropagation()
+                      await window.api.request.deleteRequest(itemId)
+                    }
+                    if (!collectionId) {
+                      setIsOpen(true)
+                      setSelectedRequest(item)
+                    }
                   }}
                   className="absolute right-1 top-[1px] "
                 >
@@ -252,6 +278,30 @@ const RequestHeader = ({ requestData, request, setRequest }: any) => {
           </div>
         )
       })}
+
+      <GlassBlurModal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+        <p className="text-center py-5! uppercase">Save Request</p>
+        <div className="pb-5! flex justify-center gap-4 items-center">
+          <button
+            onClick={() => {
+              const { _id } = selectedRequest
+              const itemId = convertId(_id)
+              window.api.request.deleteRequest(itemId)
+              setIsOpen(false)
+            }}
+            className="py-1! px-4! hover:bg-[#2b2b2b] border border-gray-400 rounded-md cursor-pointer"
+          >
+            Don't Save
+          </button>
+          <SaveCollectionPopUp
+            setTopOpen={setIsOpen}
+            requestPayload={{ ...selectedRequest, id: Date.now() }}
+            trigger={
+              <button className="py-1.5! px-4! bg-[#242424] rounded-md cursor-pointer">Save</button>
+            }
+          />
+        </div>
+      </GlassBlurModal>
     </div>
   )
 }

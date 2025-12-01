@@ -646,7 +646,14 @@ export const RenderNodeItem = ({
   )
 }
 
-const AddEditTitleModal = ({ type, initalTitle, selectedData, setIsOpen, onAdd, onEdit }) => {
+export const AddEditTitleModal = ({
+  type,
+  initalTitle,
+  selectedData,
+  setIsOpen,
+  onAdd,
+  onEdit
+}) => {
   const [title, setTitle] = useState(initalTitle)
   return (
     <div className="flex items-center justify-center flex-col gap-5 py-3!">
@@ -697,7 +704,7 @@ const AddEditTitleModal = ({ type, initalTitle, selectedData, setIsOpen, onAdd, 
   )
 }
 
-const AddEditFolderModal = ({
+export const AddEditFolderModal = ({
   type,
   initalTitle,
   selectedData,

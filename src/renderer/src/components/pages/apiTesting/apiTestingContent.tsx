@@ -109,6 +109,11 @@ const SearchHeader = () => {
         <option value="PATCH">PATCH</option>
       </select>
       <input
+        onKeyDown={(e) => {
+          if (e.key == 'Enter') {
+            runTest()
+          }
+        }}
         value={inputValue}
         onChange={(e) => {
           const value = e.target.value

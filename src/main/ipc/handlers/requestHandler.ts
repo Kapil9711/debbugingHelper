@@ -18,6 +18,7 @@ export function registorRequestHandler() {
     // await RequestModel.deleteMany({})
     const payload: any = {
       type: request?.type || '',
+      title: request?.title || '',
       url: request?.url || '',
       body: request?.body || '',
       method: request?.method || '',
