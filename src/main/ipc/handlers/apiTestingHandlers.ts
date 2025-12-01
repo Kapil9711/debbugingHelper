@@ -121,7 +121,17 @@ export function registorApiTestingHandler() {
   ipcMain.handle(Channels.apiTesting.GetCollections, async (_: any, query: any) => {
     const db = getDb()
     const ApiTestingModel = db.collection('apiTestingColl')
-    const allDocs = await ApiTestingModel.find({}).sort({ createdAt: -1 }).toArray()
+    let finalQuery: any = {}
+    if (query) {
+      finalQuery._id = new ObjectId(query)
+    }
+    let allDocs
+    if (!query) {
+      allDocs = await ApiTestingModel.find(finalQuery).sort({ createdAt: -1 }).toArray()
+    }
+    if (query) {
+      allDocs = await ApiTestingModel.findOne(finalQuery)
+    }
     return allDocs
   })
   ipcMain.handle(Channels.apiTesting.SetCollection, async (_: any, collection: any) => {

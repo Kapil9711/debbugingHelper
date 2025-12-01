@@ -16,6 +16,12 @@ import { ApiTestingEventType } from '@shared/eventType'
 import toast from 'react-hot-toast'
 import { FaAngleDown, FaPlus } from 'react-icons/fa'
 import GlassDropdown from '../glassDropDown'
+import {
+  folderPayload,
+  handleAddToCollection,
+  handleDeleteCollectionDoc,
+  requestPayload
+} from '@renderer/utlis/collectionHelper'
 
 const SideBar = () => {
   const { isSidebarExpanded, activePage } = useThemeContext() || {}
@@ -46,11 +52,9 @@ const sidebarData = [
   { title: 'Network', icon: <GiNetworkBars />, url: '/network' },
   { title: 'Api Testing', icon: <GrTest />, url: '/api-testing' }
 ]
-
 const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
   const { theme, toggleTheme, isSidebarExpanded, setIsSidebarExpanded, activePage } =
     useThemeContext() || {}
-
   return (
     <Header>
       <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center relative  px-4! ">
@@ -64,7 +68,6 @@ const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
             <p className="text-[13px] tracking-[.9px] font-medium">Kapil's Production</p>
           </div>
         )}
-
         <div className="flex items-center gap-2">
           <TbLayoutSidebarRightCollapseFilled
             onClick={() => {
@@ -99,7 +102,6 @@ const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
             </p>
           )}
         </div>
-
         {isSidebarExpanded && activePage && (
           <>
             <p
@@ -309,7 +311,7 @@ const SidebarApiTestingContent = () => {
           const collection = selectedCollection[id]
 
           return (
-            <div key={id}>
+            <div key={id} className={collection ? 'border-l-1 border-[#333333]' : ''}>
               <p
                 onClick={() => {
                   if (collection) {
@@ -417,81 +419,21 @@ const SidebarApiTestingContent = () => {
 const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection, level }: any) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const collection = selectedCollections
-
   const { docs, _id } = selectedCollections
   const id = convertId(_id)
-  const handleDeleteDoc = async (targetId) => {
-    const removeNodeById = (nodes, targetId) => {
-      return nodes
-        .filter((node) => node.id !== targetId)
-        .map((node) => {
-          if (Array.isArray(node.docs) && node.docs.length > 0) {
-            return {
-              ...node,
-              docs: removeNodeById(node.docs, targetId)
-            }
-          }
-          return node
-        })
-    }
-    const updatedDocs = removeNodeById(collection?.docs, targetId)
-    const updatedCollection = { ...selectedCollections, docs: updatedDocs }
-    await window.api.apiTesting.updateCollection({
-      id,
-      payload: { ...updatedCollection, isDocs: true }
-    })
-    setSelectedCollection({ ...selectedCollections, [id]: updatedCollection })
-  }
 
-  const handleAddRequest = async (folderId) => {
-    const requestPayload = {
-      id: Date.now(),
-      method: 'GET',
-      title: '',
-      url: ''
-    }
-    const addRequest = (nodes, targetId, requestPayload) => {
-      return nodes.map((node) => {
-        const { docs, id } = node
-        const isFolder = Array.isArray(docs)
-        if (isFolder) {
-          // if target folder found
-          if (id == targetId) {
-            return { ...node, docs: [...docs, requestPayload] }
-          }
-          return { ...node, docs: addRequest(docs, targetId, requestPayload) }
-          // if not found that do recursive
-        }
-        //  return unchanged if request
-        return node
-      })
-    }
-    const updatedDocs = addRequest(collection?.docs, folderId, requestPayload)
-    const updatedCollection = { ...collection, docs: updatedDocs }
+  const handleDeleteDoc = handleDeleteCollectionDoc.bind(null, id)
+  const handleAddRequest = handleAddToCollection.bind(null, id, requestPayload)
+  const handleAddFolder = handleAddToCollection.bind(null, id, folderPayload)
+  const pushRequest = async (collectionId, payload) => {
+    payload.collectionId = collectionId
     try {
-      await window.api.apiTesting.updateCollection({
-        id,
-        payload: { ...updatedCollection, isDocs: true }
-      })
-      openFolder(folderId)
+      window.api.request.setRequest(payload)
     } catch (error) {
-      openFolder(folderId)
+      toast.error('Enalble to add to Request')
     }
   }
-
-  const handleAddFolder = async (rootId) => {
-    const { docs, _id } = collection || {}
-    const collectionId = convertId(_id)
-    if (collectionId == rootId) {
-      const folderPayload = { title: 'NEW FOLDER', docs: [], id: Date.now() }
-      const updatedDocs = [...docs, folderPayload]
-      await window.api.apiTesting.updateCollection({
-        id: collectionId,
-        payload: { ...collection, docs: updatedDocs, isDocs: true }
-      })
-    }
-  }
-
+  const handlePushRequest = pushRequest.bind(null, convertId(collection._id))
   function toggleFolder(id: string) {
     setExpandedIds((prev) => {
       const next = new Set(prev)
@@ -508,18 +450,21 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection, l
     })
   }
 
-  console.log(selectedCollections, 'selectCol')
   return (
     <div key={id} className="pl-1.5!">
       {docs.map((item, index) => {
         return (
           <RenderNodeItem
+            key={item?.id}
             item={item}
             level={0}
             expandedIds={expandedIds}
             toggleFolder={toggleFolder}
             handleAddRequest={handleAddRequest}
             handleDeleteDoc={handleDeleteDoc}
+            handleAddFolder={handleAddFolder}
+            handlePushRequest={handlePushRequest}
+            openFolder={openFolder}
           />
         )
       })}
@@ -533,7 +478,10 @@ const RenderNodeItem = ({
   expandedIds,
   toggleFolder,
   handleAddRequest,
-  handleDeleteDoc
+  handleDeleteDoc,
+  handleAddFolder,
+  handlePushRequest,
+  openFolder
 }) => {
   const { docs, id } = item
   const isFolder = Array.isArray(docs)
@@ -542,7 +490,11 @@ const RenderNodeItem = ({
   if (folderId) {
     const isOpen = expandedIds.has(folderId)
     return (
-      <div key={folderId}>
+      <div
+        style={{ paddingLeft: paddingInline }}
+        key={folderId}
+        className={isOpen ? 'border-l-1 border-[#505050]' : ''}
+      >
         <p
           onClick={() => toggleFolder(folderId)}
           className="text-sm uppercase text-gray-300 cursor-pointer p-[3px]! px-2! rounded-md hover:bg-[#191919] flex items-center justify-between select-none"
@@ -561,6 +513,7 @@ const RenderNodeItem = ({
               onClick={async (e) => {
                 e.stopPropagation()
                 handleAddRequest(folderId)
+                openFolder(folderId)
               }}
               className="p-[5px]! rounded-sm hover:bg-[#393939]"
             >
@@ -575,8 +528,9 @@ const RenderNodeItem = ({
             >
               <div className="w-fit px-3! py-2! flex flex-col gap-0.5">
                 <p
-                  onClick={async (e) => {
-                    // handleAddFolder(item, id)
+                  onClick={async () => {
+                    handleAddFolder(folderId)
+                    openFolder(folderId)
                   }}
                   className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                 >
@@ -585,13 +539,15 @@ const RenderNodeItem = ({
                 <p
                   onClick={async () => {
                     handleAddRequest(folderId)
+                    openFolder(folderId)
                   }}
                   className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                 >
                   New Request
                 </p>
                 <p
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     handleDeleteDoc(id)
                   }}
                   className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
@@ -617,12 +573,16 @@ const RenderNodeItem = ({
           docs?.map((item) => {
             return (
               <RenderNodeItem
+                key={id}
                 handleAddRequest={handleAddRequest}
                 item={item}
                 level={level + 1}
                 expandedIds={expandedIds}
                 toggleFolder={toggleFolder}
                 handleDeleteDoc={handleDeleteDoc}
+                handleAddFolder={handleAddFolder}
+                handlePushRequest={handlePushRequest}
+                openFolder={openFolder}
               />
             )
           })}
@@ -630,15 +590,14 @@ const RenderNodeItem = ({
     )
   }
   return (
-    <>
+    <div style={{ paddingLeft: paddingInline }}>
       <p
-        style={{ paddingInline: paddingInline }}
         onClick={() => {
-          // console.log(item, 'item')
-          // window.api.request.setRequest({ ...item, collectionId: id })
+          handlePushRequest(item)
+          openFolder(id)
         }}
         key={id}
-        className="text-[13px] uppercase flex items-center justify-between  py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer! select-none"
+        className="text-[13px] uppercase flex items-center justify-between px-[8px]!  py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer! select-none"
       >
         <span
           className={`truncate text-[12px] ${
@@ -659,7 +618,8 @@ const RenderNodeItem = ({
           </span>
         </span>
         <span
-          onClick={async () => {
+          onClick={async (e) => {
+            e.stopPropagation()
             handleDeleteDoc(id)
           }}
           className="p-[3px]!  rounded-sm hover:bg-[#393939]"
@@ -667,7 +627,7 @@ const RenderNodeItem = ({
           <MdDelete className="" />
         </span>
       </p>
-    </>
+    </div>
   )
 }
 
