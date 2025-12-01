@@ -122,7 +122,7 @@ const SearchHeader = () => {
           handleUpdatedCollection(request?.id, updateValue)
         }}
         type="text"
-        className="h-[38px] shadow-sm w-[65%] border border-gray-400 rounded-md px-3! outline-none text-sm"
+        className="h-[38px] shadow-sm tracking-[.5px] w-[75%] border border-gray-400 rounded-md px-3! outline-none  text-xs"
       />
 
       <button

@@ -47,7 +47,6 @@ const NetworkPage = ({}) => {
         console.warn('Unknown network event type', event)
     }
   }, [])
-
   const handleRequestEvent = useCallback((event: any) => {
     if (!event) return
     switch (event.type) {
@@ -64,6 +63,7 @@ const NetworkPage = ({}) => {
         console.warn('Unknown network event type', event)
     }
   }, [])
+  const [collection, setCollection] = useState(null)
 
   useEffect(() => {
     const loadInitial = async () => {
@@ -73,6 +73,13 @@ const NetworkPage = ({}) => {
       const searchString = await window.api.network.getSearchString()
       const selectedRequest = await window.api.network.getSelecetedRequest()
       const requestArr = await window.api.request.getRequest('')
+      const collections = await window.api.apiTesting.getCollections('')
+      if (collections?.length) {
+        setCollection(collections[0])
+      } else {
+        setCollection(null)
+      }
+
       setRequestData(requestArr)
       setTestData(selectedRequest)
       setFilter(searchString)
@@ -108,9 +115,10 @@ const NetworkPage = ({}) => {
       setTestData,
       filter,
       setFilter,
-      requestData
+      requestData,
+      collection
     }
-  }, [autoClearLength, logs, pauseNetwork, testData, filter, requestData])
+  }, [autoClearLength, logs, pauseNetwork, testData, filter, requestData, collection])
   return (
     <NetworkPageContext.Provider value={value}>
       <div className="w-full h-full">

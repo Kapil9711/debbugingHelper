@@ -1,10 +1,11 @@
+import SaveCollectionPopUp from '@renderer/components/saveCollectionPopUp'
 import { useNetworkPageContext } from '@renderer/screen/networkPage'
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import ReactJson from 'react-json-view'
 
 const NetworkPageContent = () => {
-  const { logs, setTestData, filter, setFilter } = useNetworkPageContext()
+  const { logs, collection, filter, setFilter } = useNetworkPageContext()
   const [filterLogs, setFilterLogs] = useState(logs)
   const handleCopy = async (textToCopy) => {
     await navigator.clipboard.writeText(textToCopy)
@@ -73,6 +74,7 @@ const NetworkPageContent = () => {
         setIsHovered={setIsHovered}
         isHovered={isHovered}
         handleCopy={handleCopy}
+        collection={collection}
       />
     </div>
   )
@@ -121,7 +123,7 @@ const HomePageFilters = ({ handleFilter, count, filter, setFilter, filterRef }: 
   )
 }
 
-const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
+const DataList = ({ logs, setIsHovered, isHovered, handleCopy, collection }) => {
   return (
     <>
       {logs.map((item: any, index: any) => {
@@ -165,6 +167,32 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy }) => {
               >
                 Test
               </button>
+              {collection && (
+                <>
+                  <SaveCollectionPopUp
+                    trigger={
+                      <button
+                        style={{ display: isHovered == index ? 'block' : 'none' }}
+                        onClick={async () => {
+                          // await window.api.network.setSelecetedRequest(item?.data)
+                          // await window.api.request.setRequest(item?.data)
+                        }}
+                        className="border border-gray-400 h-[25px] w-[60px]  text-xs rounded-md cursor-pointer uppercase bg-[#242424]"
+                      >
+                        Save
+                      </button>
+                    }
+                    requestPayload={{
+                      id: Date.now(),
+                      url: item?.data?.url,
+                      method: item?.data?.method,
+                      headers: item?.data?.headers,
+                      body: item?.data?.body,
+                      title: ''
+                    }}
+                  />
+                </>
+              )}
             </div>
 
             <ReactJson

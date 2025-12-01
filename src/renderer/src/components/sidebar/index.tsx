@@ -204,7 +204,7 @@ const SidebarMainContent = () => {
   )
 }
 
-const SidebarApiTestingContent = () => {
+export const SidebarApiTestingContent = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [collections, setCollections] = useState([])
   const [selectedCollection, setSelectedCollection] = useState({})
@@ -476,7 +476,7 @@ const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection, l
   )
 }
 
-const RenderNodeItem = ({
+export const RenderNodeItem = ({
   item,
   level,
   expandedIds,

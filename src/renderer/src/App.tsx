@@ -38,6 +38,7 @@ function App(): React.JSX.Element {
           }
         }}
       />
+
       <Routes>
         {/* Layout Wrapper */}
         <Route element={<MainLayout />}>
