@@ -1,54 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import GlassBlurModal from './glassBodyModal'
-import { ApiTestingEventType } from '@shared/eventType'
-import toast from 'react-hot-toast'
-import { convertId } from '@renderer/utlis/dbHelper'
-
+import GlassBlurModal from '@renderer/components/glassBodyModal'
+import GlassDropdown from '@renderer/components/glassDropDown'
 import {
   folderPayload,
   handleAddToCollection,
   handleDeleteCollectionDoc,
+  requestPayload,
   updateCollectionById
 } from '@renderer/utlis/collectionHelper'
+import { convertId } from '@renderer/utlis/dbHelper'
+import { ApiTestingEventType } from '@shared/eventType'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import { FaPlus } from 'react-icons/fa'
 import { IoIosFolderOpen } from 'react-icons/io'
-import GlassDropdown from './glassDropDown'
-import { TbDots } from 'react-icons/tb'
-// import { AddEditFolderModal, AddEditTitleModal } from './sidebar'
 import { MdDelete } from 'react-icons/md'
-import {
-  AddEditFolderModal,
-  AddEditTitleModal
-} from './sidebar/components/secondaryContent/apiTesting/content'
+import { TbDots } from 'react-icons/tb'
 
-const SaveCollectionPopUp = ({ initialOpen, trigger, requestPayload, setTopOpen }: any) => {
-  const [isOpen, setIsOpen] = useState(initialOpen || false)
-  useEffect(() => {
-    return () => {
-      if (typeof setTopOpen == 'function' && isOpen) {
-        setTopOpen(false)
-      }
-    }
-  }, [isOpen])
-  return (
-    <>
-      <div onClick={() => setIsOpen(true)}>{trigger ? trigger : 'open'}</div>
-
-      <div></div>
-      <GlassBlurModal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-        }}
-      >
-        <div className="py-8!">
-          <SidebarApiTestingContent requestPayload={requestPayload} setIsOpen={setIsOpen} />
-        </div>
-      </GlassBlurModal>
-    </>
-  )
-}
-
-export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenModal }: any) => {
+export const SidebarApiTestingContent = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [collections, setCollections] = useState([])
   const [selectedCollection, setSelectedCollection] = useState({})
@@ -175,7 +143,7 @@ export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenM
                   }}
                   className="flex items-center gap-2"
                 >
-                  {/* <span
+                  <span
                     onClick={async (e) => {
                       e.stopPropagation()
                       handleAddRequest(e, item, id)
@@ -183,7 +151,7 @@ export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenM
                     className="p-[5px]! rounded-sm hover:bg-[#393939]"
                   >
                     <FaPlus />
-                  </span> */}
+                  </span>
                   <GlassDropdown
                     trigger={
                       <span className="p-[5px]! block   rounded-sm hover:bg-[#393939] relative">
@@ -200,19 +168,19 @@ export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenM
                       >
                         New Folder
                       </p>
-                      {/* <p
+                      <p
                         onClick={async (e) => {
                           handleAddRequest(e, item, id)
                         }}
                         className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                       >
                         New Request
-                      </p> */}
+                      </p>
                       <p
                         onClick={() => {
                           window.api.apiTesting.deleteCollection(id)
                         }}
-                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] hover:text-red-400 uppercase"
+                        className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                       >
                         Delete
                       </p>
@@ -232,12 +200,10 @@ export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenM
               </p>
               {collection && (
                 <ShowSelectedCollections
-                  requestPayload={requestPayload}
                   key={collection?.docs?.length}
                   selectedCollections={collection}
                   setSelectedCollection={setSelectedCollection}
                   level={0}
-                  setIsOpen={setIsOpenModal}
                 />
               )}
             </div>
@@ -263,8 +229,10 @@ export const SidebarApiTestingContent = ({ requestPayload, setIsOpen: setIsOpenM
   )
 }
 
-const ShowSelectedCollections = ({ selectedCollections, requestPayload, setIsOpen }: any) => {
+const ShowSelectedCollections = ({ selectedCollections }: any) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  // const collection = selectedCollections
   const { docs, _id } = selectedCollections
   const id = convertId(_id)
   const handleDeleteDoc = handleDeleteCollectionDoc.bind(null, id)
@@ -313,7 +281,6 @@ const ShowSelectedCollections = ({ selectedCollections, requestPayload, setIsOpe
             handlePushRequest={handlePushRequest}
             openFolder={openFolder}
             handleUpdatedCollection={handleUpdatedCollection}
-            setIsOpen={setIsOpen}
           />
         )
       })}
@@ -331,8 +298,7 @@ export const RenderNodeItem = ({
   handleAddFolder,
   handlePushRequest,
   openFolder,
-  handleUpdatedCollection,
-  setIsOpen
+  handleUpdatedCollection
 }) => {
   const [editDoc, setEditDoc] = useState(null as any)
   const { docs, id } = item
@@ -355,14 +321,13 @@ export const RenderNodeItem = ({
             <IoIosFolderOpen />
             <span className="ml-2 uppercase text-[#9d9d9d] text-[11px]">{item?.title}</span>
           </span>
-
           <div
             onClick={(e) => {
               e.stopPropagation()
             }}
             className="flex items-center gap-2"
           >
-            {/* <span
+            <span
               onClick={async (e) => {
                 e.stopPropagation()
                 handleAddRequest(folderId)
@@ -371,20 +336,6 @@ export const RenderNodeItem = ({
               className="p-[5px]! rounded-sm hover:bg-[#393939]"
             >
               <FaPlus />
-            </span> */}
-            <span
-              onClick={async () => {
-                try {
-                  handleAddRequest(folderId)
-                  toast.success('Saved Successfully')
-                  setIsOpen(false)
-                } catch (error) {
-                  toast.error('Error saving request')
-                }
-              }}
-              className="p-[5px]! rounded-sm text-xs hover:bg-[#393939]"
-            >
-              save
             </span>
             <GlassDropdown
               trigger={
@@ -403,7 +354,7 @@ export const RenderNodeItem = ({
                 >
                   New Folder
                 </p>
-                {/* <p
+                <p
                   onClick={async () => {
                     handleAddRequest(folderId)
                     openFolder(folderId)
@@ -411,13 +362,13 @@ export const RenderNodeItem = ({
                   className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                 >
                   New Request
-                </p> */}
+                </p>
                 <p
                   onClick={(e) => {
                     e.stopPropagation()
                     handleDeleteDoc(id)
                   }}
-                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase hover:text-red-400"
+                  className="text-xs p-2! py-1! rounded-sm hover:bg-[#333333] cursor-pointer text-[#cecece] uppercase"
                 >
                   Delete
                 </p>
@@ -449,7 +400,6 @@ export const RenderNodeItem = ({
                 handlePushRequest={handlePushRequest}
                 openFolder={openFolder}
                 handleUpdatedCollection={handleUpdatedCollection}
-                setIsOpen={setIsOpen}
               />
             )
           })}
@@ -469,6 +419,10 @@ export const RenderNodeItem = ({
   return (
     <div style={{ paddingLeft: paddingInline }} className="border-l-1 border-[#505050]">
       <p
+        onClick={() => {
+          handlePushRequest(item)
+          openFolder(id)
+        }}
         key={id}
         className="text-[13px] uppercase flex items-center justify-between px-[8px]!  py-[4px]! hover:bg-[#151515] rounded-sm cursor-pointer! select-none"
       >
@@ -486,7 +440,7 @@ export const RenderNodeItem = ({
           }`}
         >
           {item?.method}{' '}
-          <span className="ml-2 lowercase text-[#9d9d9d] text-[11px] max-w-[90%] truncate">
+          <span className="ml-2 lowercase text-[#9d9d9d] text-[11px]">
             {item?.title || item?.url}
           </span>
         </span>
@@ -504,4 +458,117 @@ export const RenderNodeItem = ({
   )
 }
 
-export default SaveCollectionPopUp
+export const AddEditTitleModal = ({
+  type,
+  initalTitle,
+  selectedData,
+  setIsOpen,
+  onAdd,
+  onEdit
+}) => {
+  const [title, setTitle] = useState(initalTitle)
+  return (
+    <div className="flex items-center justify-center flex-col gap-5 py-3!">
+      <p className="text-center text-[#b5b5b5] text-sm ">{type} Collection</p>
+      <div className="flex  gap-2">
+        <input
+          onKeyDown={(e) => {
+            if (e.key == 'Enter') {
+              if (type == 'Add') {
+                onAdd(title)
+                setIsOpen(false)
+              }
+              if (type == 'Edit') {
+                const id = convertId(selectedData?._id)
+                const payload = { ...selectedData, title }
+                onEdit(id, payload)
+                setIsOpen(false)
+              }
+            }
+          }}
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+          }}
+          placeholder="Enter Title"
+          type="text"
+          className="bg-[#232323] px-3! py-1! text-sm rounded-md outline-none border border-[#3b3a3a]"
+        />
+        <button
+          onClick={() => {
+            if (type == 'Add') {
+              onAdd(title)
+              setIsOpen(false)
+            }
+            if (type == 'Edit') {
+              const id = convertId(selectedData?._id)
+              const payload = { ...selectedData, title }
+              onEdit(id, payload)
+              setIsOpen(false)
+            }
+          }}
+          className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2 max-w-[50%] mx-auto!"
+        >
+          {type == 'Add' ? 'Create' : 'Submit'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export const AddEditFolderModal = ({
+  type,
+  initalTitle,
+  selectedData,
+  setEditDoc,
+  handleUpdatedCollection
+}) => {
+  const [title, setTitle] = useState(initalTitle)
+  const inputRef = useRef(null as any)
+
+  useEffect(() => {
+    if (inputRef?.current) {
+      inputRef?.current?.focus()
+    }
+  }, [inputRef?.current])
+
+  return (
+    <div className="flex items-center justify-center flex-col gap-5 py-3!">
+      <p className="text-center text-[#b5b5b5] text-sm ">{type} Folder</p>
+      <div className="flex  gap-2">
+        <input
+          onKeyDown={(e) => {
+            if (e.key == 'Enter') {
+              const payload = { title }
+              handleUpdatedCollection(selectedData?.id, payload)
+              setEditDoc(null)
+            }
+          }}
+          ref={inputRef}
+          value={title}
+          onChange={(e) => {
+            setTitle(e.target.value)
+          }}
+          placeholder="Enter Title"
+          type="text"
+          className="bg-[#232323] px-3! py-1! text-sm rounded-md outline-none border border-[#3b3a3a]"
+        />
+        <button
+          onClick={() => {
+            // if (type == 'Add') {
+            //   window.api.apiTesting.setCollection({ title })
+            //   setEditDocId(null)
+            // }
+
+            const payload = { title }
+            handleUpdatedCollection(selectedData?.id, payload)
+            setEditDoc(null)
+          }}
+          className="bg-[#2d2d2d] px-3! py-1! rounded-md text-sm text-[#e8e8e8] cursor-pointer flex items-center gap-2 max-w-[50%] mx-auto!"
+        >
+          {type == 'Add' ? 'Create' : 'Submit'}
+        </button>
+      </div>
+    </div>
+  )
+}
