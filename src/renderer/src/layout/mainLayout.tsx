@@ -5,7 +5,7 @@ import { Outlet } from 'react-router-dom'
 const ThemeContext = createContext({} as any)
 export const useThemeContext = () => useContext(ThemeContext)
 
-const MainLayout = ({ children }: any) => {
+const MainLayout = () => {
   const [theme, setTheme] = useState('dark')
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
   const [activePage, setActivePage] = useState('')
@@ -36,7 +36,7 @@ const MainLayout = ({ children }: any) => {
         <SideBar />
 
         {/* //right page Content */}
-        <div className="h-full transition-all duration-100 ease-in  flex-1   overflow-hidden bg-[var(--bg-content)]">
+        <div className="h-full transition-all duration-100 ease-in  flex-1   overflow-hidden bg-base-200">
           <Outlet />
         </div>
       </div>

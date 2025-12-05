@@ -2,19 +2,19 @@ import { MdDarkMode, MdDelete, MdOutlineLightMode } from 'react-icons/md'
 import Header from '../header'
 import { useThemeContext } from '@renderer/layout/mainLayout'
 import profileImage from '@renderer/assets/kapil.png'
-import { TbDots, TbDotsVertical, TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
+import { TbDots, TbLayoutSidebarRightCollapseFilled } from 'react-icons/tb'
 import { VscDebugConsole } from 'react-icons/vsc'
 import { IoIosFolderOpen, IoIosSettings } from 'react-icons/io'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { GiNetworkBars } from 'react-icons/gi'
 import { GrRevert, GrTest } from 'react-icons/gr'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CiEdit } from 'react-icons/ci'
+
 import GlassBlurModal from '../glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
 import { ApiTestingEventType } from '@shared/eventType'
 import toast from 'react-hot-toast'
-import { FaAngleDown, FaPlus } from 'react-icons/fa'
+import { FaPlus } from 'react-icons/fa'
 import GlassDropdown from '../glassDropDown'
 import {
   folderPayload,
@@ -33,7 +33,7 @@ const SideBar = () => {
 
   return (
     <div
-      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full mobile:max-w-[250px] tabletS:max-w-[280px] tabletL:max-w-[300px]  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-[var(--bg-sidebar)] border-r-[.5px] border-gray-400`}
+      className={` transition-all duration-77 ease-in-out ${isSidebarExpanded ? 'w-full' : 'w-20'} max-h-full   h-full mobile:max-w-[250px] tabletS:max-w-[280px] tabletL:max-w-[300px]  desktopL:max-w-[400px] desktopS:max-w-[300px] bg-base-100 border-r border-neutral text-base-content`}
     >
       <SidebarHeader localActivePage={localActivePage} setLocalActivePage={setLocalActivePage} />
 
@@ -58,7 +58,7 @@ const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
     useThemeContext() || {}
   return (
     <Header>
-      <div className="w-full border-b-[.5px] border-gray-400 h-full  flex justify-between items-center relative  px-4! ">
+      <div className="w-full border-b border-neutral h-full  flex justify-between items-center relative  px-4! ">
         {isSidebarExpanded && (
           <div className="flex items-center gap-3">
             <img
@@ -66,7 +66,9 @@ const SidebarHeader = ({ localActivePage, setLocalActivePage }: any) => {
               alt="logo"
               className="h-8 w-8 block rounded-full bg-cover object-cover "
             />
-            <p className="text-[13px] tracking-[.9px] font-medium">Kapil's Production</p>
+            <p className="text-[13px] tracking-[.9px] text-base-content font-medium">
+              Kapil's Production
+            </p>
           </div>
         )}
         <div className="flex items-center gap-2">
@@ -417,7 +419,7 @@ export const SidebarApiTestingContent = () => {
   )
 }
 
-const ShowSelectedCollections = ({ selectedCollections, setSelectedCollection, level }: any) => {
+const ShowSelectedCollections = ({ selectedCollections }: any) => {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
   // const collection = selectedCollections

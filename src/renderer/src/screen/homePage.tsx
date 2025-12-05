@@ -81,7 +81,7 @@ const HomePage = ({}) => {
   }, [autoClearLength, logs, pauseConsole, filter])
   return (
     <HomePageContext.Provider value={value}>
-      <div className="w-full h-full">
+      <div className="w-full h-full ">
         <HomePageHeader />
         <HomePageContent />
       </div>

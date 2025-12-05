@@ -9,7 +9,7 @@ const HomePageHeader = () => {
 
   return (
     <Header>
-      <div className="text-center font-bold py-2.5   flex items-center justify-between gap-2.5 px-[30px]! border-b border-gray-400  h-full">
+      <div className="text-center font-bold py-2.5   flex items-center justify-between gap-2.5 px-[30px]! border-b border-neutral  h-full">
         <div className=" flex flex-col justify-center gap-2">
           <p className=" capitalize text-[13px] tracking-[.5px]">http://localhost:5600/debugging</p>
           <div className="flex item-center gap-5 ">

@@ -125,7 +125,7 @@ const HomePageContent = () => {
   return (
     <div
       ref={containerRef}
-      className=".logs-scroll flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative"
+      className=".logs-scroll flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden  relative"
     >
       <HomePageFilters
         count={filterLogs?.length}

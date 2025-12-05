@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import GlassBlurModal from '@renderer/components/glassBodyModal'
 import { convertId } from '@renderer/utlis/dbHelper'
 import { IoMdAdd, IoMdClose } from 'react-icons/io'
-import { handleUpdateCollectionById, updateCollectionById } from '@renderer/utlis/collectionHelper'
+import { updateCollectionById } from '@renderer/utlis/collectionHelper'
 import SaveCollectionPopUp from '@renderer/components/saveCollectionPopUp'
 
 const ApiTestingHeader = () => {
