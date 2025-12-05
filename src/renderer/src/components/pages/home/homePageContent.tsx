@@ -257,7 +257,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, handleSearchHighl
             onMouseEnter={() => setIsHovered(index)}
             onMouseLeave={() => setIsHovered('')}
             key={index}
-            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative max-w-[80%] ${isHovered == index ? 'border border-gray-200' : ''} `}
+            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative break-all max-w-[80%] ${isHovered == index ? 'border border-gray-200' : ''} `}
           >
             <div className="flex items-center gap-5">
               <p

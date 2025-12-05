@@ -23,13 +23,13 @@ const SidebarPrimaryContent = () => {
   // tailwind classes
 
   return (
-    <div className="flex flex-col px-5! py-8! gap-2 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
+    <div className="flex flex-col px-5! py-8! gap-1.5 overflow-auto h-[calc(100%-160px)] scrollbar-hidden">
       {sidebarData?.map((item: any, index: any) => {
         const sidebarItemClass = clsx(
-          'relative  shrink-0 h-8 w-full rounded-sm cursor-pointer flex items-center gap-2 transition-all duration-100 ease-in select-none text-neutral-content',
+          'relative  shrink-0 h-7.5 w-full rounded-sm cursor-pointer flex items-center gap-2 transition-all duration-100 ease-in select-none text-base-content',
           // Active item styles
           {
-            'bg-neutral text-base-content!': path === item?.url
+            'bg-neutral text-neutral-content': path === item?.url
           },
 
           // Justify based on sidebar state
@@ -37,7 +37,7 @@ const SidebarPrimaryContent = () => {
           // Padding adjustment
           !isSidebarExpanded ? '!pl-0' : '!pl-[10px]',
           // Hover styles
-          'hover:bg-neutral hover:text-base-content'
+          'hover:bg-neutral hover:text-neutral-content'
         )
         return (
           <p

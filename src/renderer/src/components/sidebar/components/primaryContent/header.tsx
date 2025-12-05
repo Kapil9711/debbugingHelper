@@ -44,7 +44,7 @@ const ToggleSidebar = ({ setLocalActivePage }) => {
   const { isSidebarExpanded, setIsSidebarExpanded, activePage } = useThemeContext() || {}
   return (
     <div className="flex items-center gap-2">
-      <span className="cursor-pointer text-neutral-content hover:text-base-content! hover:bg-neutral p-1! rounded-sm">
+      <span className="cursor-pointer text-base-content hover:text-neutral-content! hover:bg-neutral p-1! rounded-sm">
         <TbLayoutSidebarRightCollapseFilled
           onClick={() => {
             if (!isSidebarExpanded) {

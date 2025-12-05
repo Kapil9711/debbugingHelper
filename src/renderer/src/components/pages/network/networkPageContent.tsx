@@ -59,7 +59,7 @@ const NetworkPageContent = () => {
   }, [logs])
 
   return (
-    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden bg-[#101111] relative">
+    <div className="flex flex-col gap-10!  h-[calc(100%-80px)]  p-5! overflow-auto scrollbar-hidden  relative">
       <HomePageFilters
         count={filterLogs?.length}
         handleFilter={handleFilter}
@@ -137,7 +137,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, collection }) => 
             onMouseLeave={() => setIsHovered('')}
             key={index}
             style={{ wordWrap: 'break-word' }}
-            className={`  hover:rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer hover:shadow-md relative max-w-[80%] break-all ${isHovered == index ? 'border border-gray-200' : ''} `}
+            className={`rounded-md flex flex-col justify-center w-fit p-2! $   gap-1.5 cursor-pointer  relative max-w-[80%] break-all ${isHovered == index ? 'border border-neutral   hover:shadow-md hover:shadow-base-100' : ''} `}
           >
             <div className="flex items-center gap-5">
               <p className="text-indigo-400! border-b  border-white w-fit" key={index}>
@@ -149,7 +149,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, collection }) => 
                   const obj = JSON.stringify(item?.data, null, 2)
                   handleCopy(obj)
                 }}
-                className="border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
+                className="border border-neutral h-[25px] w-[60px] bg-base-100 text-base-content  text-xs rounded-md cursor-pointer uppercase "
               >
                 Copy
               </button>
@@ -163,7 +163,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, collection }) => 
                   // const obj = JSON.stringify(item?.data, null, 2)
                   // handleCopy(obj)
                 }}
-                className="border border-gray-200 h-[25px] w-[60px] bg-gray-300 text-black text-xs rounded-md cursor-pointer uppercase"
+                className=" h-[25px] w-[60px] bg-primary text-primary-content text-shadow-success-content    text-xs rounded-md cursor-pointer uppercase"
               >
                 Test
               </button>
@@ -177,7 +177,7 @@ const DataList = ({ logs, setIsHovered, isHovered, handleCopy, collection }) => 
                           // await window.api.network.setSelecetedRequest(item?.data)
                           // await window.api.request.setRequest(item?.data)
                         }}
-                        className="border border-gray-400 h-[25px] w-[60px]  text-xs rounded-md cursor-pointer uppercase bg-[#242424]"
+                        className=" h-[25px] w-[60px]  text-xs rounded-md cursor-pointer uppercase bg-secondary text-secondary-content  "
                       >
                         Save
                       </button>
